@@ -1,13 +1,13 @@
 import { Inngest } from "inngest";
 import { connectDB } from "./db.js";
-import { User } from "../models/user.modal.js"
+import { User } from "../models/user.modal.js";
 
 export const inngest = new Inngest({ id: "expo-e-commerce" });
 
 const syncUser = inngest.createFunction(
     {
         id: "sync-user",
-        triggers: { event: "clerk/product.imported" },
+        triggers: { event: "clerk/user.created" },
     },
     async ({ event }) => {
         await connectDB();
