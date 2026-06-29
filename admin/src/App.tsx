@@ -1,4 +1,4 @@
-import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react';
 
 
 function App() {
