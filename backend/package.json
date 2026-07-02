@@ -17,6 +17,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "inngest": "^4.11.0",
-    "mongoose": "^8.19.3"
+    "mongoose": "^8.19.3",
+    "multer": "^2.2.0"
   }
 }
