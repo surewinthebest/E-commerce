@@ -22,7 +22,7 @@ export async function createProduct(req, res) {
             });
         })
 
-        const uploadResults = Promise.all(uploadPromises);
+        const uploadResults = await Promise.all(uploadPromises);
 
         const imageUrls = uploadResults.map((result) => result.secure_url);
 
@@ -30,9 +30,9 @@ export async function createProduct(req, res) {
             name,
             description,
             price: parseFloat(price),
-            stocks: parseInt(stock),
+            stock: parseInt(stock),
             category,
-            image: imageUrls
+            images: imageUrls
         })
 
         res.status(201).json({ message: "Product is created successfully", product });
@@ -56,16 +56,16 @@ export async function getAllProducts(_, res) {
 
 export async function updateProduct(req, res) {
     try {
-        const { id } = req.param;
-        const { name, desciption, price, stock, category } = req.body;
+        const { id } = req.params;
+        const { name, description, price, stock, category } = req.body;
 
         const updateProduct = await Product.findById(id);
-        if (!updateProduct) return res.stauts(404).json({ message: "Product not found" });
+        if (!updateProduct) return res.status(404).json({ message: "Product not found" });
 
         if (name) updateProduct.name = name;
-        if (desciption) updateProduct.desciption = desciption;
-        if (price) updateProduct.price = parseFloat(price);
-        if (stock !== undefined) updateProduct.stock = paseInt(stock);
+        if (description) updateProduct.description = desciption;
+        if (price !== undefined) updateProduct.price = parseFloat(price);
+        if (stock !== undefined) updateProduct.stock = parseInt(stock);
         if (category) updateProduct.category = category;
 
         //update image
@@ -79,12 +79,12 @@ export async function updateProduct(req, res) {
 
             const uploadResult = await Promise.all(uploadPromises);
 
-            const imageUrls = uploadResult.map((result) => result.secure.url);
+            const imageUrls = uploadResult.map((result) => result.secure_url);
 
             if (imageUrls) updateProduct.images = imageUrls;
         }
 
-        updateProduct.save();
+        await updateProduct.save();
         res.status(200).json({ message: "Product is updated successfully", updateProduct });
     } catch (error) {
         console.error("Error updating product", error);
@@ -96,8 +96,8 @@ export async function updateProduct(req, res) {
 export async function getAllOrders(_, res) {
     try {
         const orders = await Order.find()
-            .populate("User", "name email")
-            .populate("OrderItems.product")
+            .populate("user", "name email")
+            .populate("orderItems.product")
             .sort({ createdAt: -1 });
 
         res.status(200).json({ orders });
@@ -109,14 +109,14 @@ export async function getAllOrders(_, res) {
 
 export async function updateOrderStatus(req, res) {
     try {
-        const { orderId } = req.param;
+        const { orderId } = req.params;
         const { status } = req.body;
 
         if (!["pending", "shipped", "delivered"].includes(status))
             return res.status(400).json({ message: "Invalid Order Status" });
 
-        const updateOrder = await Orders.findById(orderId);
-        if (!updateOrder) res.status(404).json({ message: "Order not found" });
+        const updateOrder = await Order.findById(orderId);
+        if (!updateOrder) return res.status(404).json({ message: "Order not found" });
 
         updateOrder.status = status;
 
@@ -127,7 +127,7 @@ export async function updateOrderStatus(req, res) {
             updateOrder.deliveredAt = new Date();
         }
 
-        Orders.save();
+        await updateOrder.save();
 
         res.status(200).json({ message: "Order status is updated successfully", updateOrder });
     } catch (error) {
@@ -148,19 +148,19 @@ export async function getAllCustomer(_, res) {
 
 export async function getDashboardStats(req, res) {
     try {
-        const totalOrders = Order.countDocuments();
+        const totalOrders = await Order.countDocuments();
 
-        const revenueResult = Order.aggregate([
+        const revenueResult = await Order.aggregate([
             {
                 $group: {
                     _id: null,
                     total: { $sum: "$totalPrice" },
-                }
+                },
             },
         ])
         const totalRevenue = revenueResult[0]?.total || 0;
-        const totalCustomers = User.countDocuments();
-        const totalProducts = Product.countDocuments();
+        const totalCustomers = await User.countDocuments();
+        const totalProducts = await Product.countDocuments();
 
         res.status(200).json({ totalOrders, totalRevenue, totalCustomers, totalProducts });
     } catch (error) {

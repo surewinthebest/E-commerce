@@ -4,19 +4,19 @@ const reviewSchema = new mongoose.Schema({
  productId:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
-    Unique: true,
+    unique: true,
  },
  userId:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    Unique: true,
+    unique: true,
  },
  orderId:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
-    Unique: true,
+    unique: true,
  },
- ratign:{
+ rating:{
     type: Number,
     min:1,
     max:5,

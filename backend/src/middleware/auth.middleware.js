@@ -24,13 +24,13 @@ export const protectRoute = [
 export const adminOnly = [
     (req, res, next) => {
         try {
-            if(!req.user) return res.status(401).json({message:"Unauthorized - User Not Found"});
-            if(req.user.email !== ENV.ADMIN_EMAIL) return res.status(403).json({message:"Forbidden - Admin Access Only"});
-
+            if (!req.user) return res.status(401).json({ message: "Unauthorized - User Not Found" });
+            if (req.user.email !== ENV.ADMIN_EMAIL) return res.status(403).json({ message: "Forbidden - Admin Access Only" });
+            next();
         } catch (error) {
             console.error("Error in adminOnly middleware", error)
             res.status(501).json({ message: "Internal Server Error" })
-        }       
-        next();
+        }
+
     }
 ]
