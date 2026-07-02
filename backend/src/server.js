@@ -11,7 +11,7 @@ const app = express();
 
 const __dirname = path.resolve();
 
-app.use(express.json);
+app.use(express.json());
 app.use(clerkMiddleware()); //adds auth object under the req => req.auth
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
@@ -19,7 +19,7 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/admin", router);
 
 app.get("/api/health", (req, res) => {
-    res.status(200).json({ "message": "Sucess" })
+    res.status(200).json({ "message": "Success" })
 })
 
 //make the app ready for deployment
