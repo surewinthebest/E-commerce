@@ -4,6 +4,9 @@ export async function addAddress(req, res) {
 
         const user = req.user;
 
+        if (!fullName || !streetAddress || !city || !state || !zipCode)
+            return res.status(400).json({ message: "Missing required address fields" });
+
         if (isDefault) {
             user.addresses.forEach((addr) => {
                 addr.isDefault = false;
@@ -110,7 +113,8 @@ export async function addToWishlist(req, res) {
 export async function getWishlist(req, res) {
     try {
         const user = req.user;
-        res.status(200).json({ wishlist: user.wishlist });
+        const wishlist = await user.wishlist.populate("Product");
+        res.status(200).json({ wishlist: wishlist });
     } catch (error) {
         console.error("Error in getWishlist controller", error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -122,7 +126,7 @@ export async function removeFromWishlist(req, res) {
         const user = req.user;
 
         const { productId } = req.params;
-        if (!user.wishlist.includes(productId)) return res.status(400).json({ message: "Product is not even in wishlist" });
+        if (!user.wishlist.includes(productId)) return res.status(400).json({ message: "Product not found in wishlist" });
 
         user.wishlist.pull(productId);
 
