@@ -1,3 +1,5 @@
+import { User } from "../models/user.modal.js";
+
 export async function addAddress(req, res) {
     try {
         const { label, fullName, streetAddress, city, state, zipCode, phoneNumber, isDefault } = req.body;
@@ -67,7 +69,7 @@ export async function updateAddress(req, res) {
         updateAddress.state = state || updateAddress.state;
         updateAddress.zipCode = zipCode || updateAddress.zipCode;
         updateAddress.phoneNumber = phoneNumber || updateAddress.phoneNumber;
-        updateAddress.isDefault = isDefault || updateAddress.isDefault;
+        updateAddress.isDefault = isDefault !== undefined ? isDefault : updateAddress.isDefault;
 
         await user.save();
 
@@ -82,6 +84,8 @@ export async function deleteAddress(req, res) {
     try {
         const user = req.user;
         const { addressId } = req.params;
+
+        if (!user.addresses.includes(addressId)) return res.status(404).json({ message: "Address not found" });
         user.addresses.pull(addressId);
 
         await user.save();
@@ -97,7 +101,7 @@ export async function addToWishlist(req, res) {
         const user = req.user;
         const { productId } = req.body;
 
-        if (user.wishlist.includes(productId)) return res.status(400).json({ message: "Product already in wishlist" });
+        if (user.wishlist.some((id) => id.equals(productId))) return res.status(400).json({ message: "Product already in wishlist" });
 
         user.wishlist.push(productId);
 
@@ -112,9 +116,8 @@ export async function addToWishlist(req, res) {
 
 export async function getWishlist(req, res) {
     try {
-        const user = req.user;
-        const wishlist = await user.wishlist.populate("Product");
-        res.status(200).json({ wishlist: wishlist });
+        const user = await User.findById(req.user._id).populate("wishlist");
+        res.status(200).json({ wishlist: user.wishlist });
     } catch (error) {
         console.error("Error in getWishlist controller", error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -126,7 +129,7 @@ export async function removeFromWishlist(req, res) {
         const user = req.user;
 
         const { productId } = req.params;
-        if (!user.wishlist.includes(productId)) return res.status(400).json({ message: "Product not found in wishlist" });
+        if (!user.wishlist.some((id) => id.equals(productId))) return res.status(400).json({ message: "Product not found in wishlist" });
 
         user.wishlist.pull(productId);
 
