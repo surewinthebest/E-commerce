@@ -3,19 +3,33 @@ import { Product } from "../models/product.modal.js";
 import { Review } from "../models/review.modal.js";
 
 export async function createOrder(req, res) {
+    const session = await Product.startSession();
+    session.startTransaction;
     try {
-        const { orderItems, shippingAddress, paymentResult, totalPrice } = res.body;
+        const { orderItems, shippingAddress, paymentResult, totalPrice } = req.body;
+        const user = req.user;
 
-        if (!orderItems || orderItems.length === 0)
-            return res.status(404).json({ error: "Order not found" });
+        if (!orderItems || orderItems.length === 0) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ error: "Order not found" });
+        }
 
         //validate product and stock
         for (const item of orderItems) {
-            const product = await Product.findById(item.product._id);
-            if (!product) return res.status(404).json({ error: `Product ${item.name} not found` });
+            const product = await Product.findById(item.product._id).session(session);
+            if (!product) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ error: "No order items provided" });
+            }
 
-            if (product.stock < item.quantity)
-                return res.status(400).json({ error: `Insufficient product ${product.name} not found` });
+
+            if (product.stock < item.quantity) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ error: `Insufficient stock for product ${product.name}` });
+            }
         }
 
         const order = await Order.create({
@@ -29,30 +43,38 @@ export async function createOrder(req, res) {
 
         //product stock update
         for (const item of orderItems) {
-            await Product.findByIdAndUpdate(item.product._id, {
-                $inc: { stock: -item.quantity }
-
-            })
+            await Product.findByIdAndUpdate(item.product._id,
+                {
+                    $inc: { stock: -item.quantity }
+                },
+                { session },
+            )
         }
 
+        await session.abortTransaction();
+        session.endSession();
         res.status(201).json({ message: "Order created successfully", order: order });
     } catch (error) {
         console.error("Error in createOrder controller", error);
-        res.state(500).json({ error: "Internal Server Error" });
+        await session.abortTransaction();
+        session.endSession();
+        res.status(500).json({ error: "Internal Server Error" });
     }
 }
 
 export async function getUserOrders(req, res) {
     try {
-        const orders = await Order.find({ clerkId: req.user.clerkId }).populate(orderItems.product).sort({ createdBy: -1 });
-
+        const orders = await Order.find({ clerkId: req.user.clerkId }).populate(orderItems?.product).sort({ createdAt: -1 });
         //check if each order has been reviewed 
+        const orderIds = orders.map(order=> order._id);
+        const reviews = Review.find({orderId:{$in:orderIds}});
+        const reviewOrderIds = new Set(reviews.map(review=> review.orderId.toString()));
+
         const orderWithReviewStatus = await Promise.all(
             orders.map(async (order) => {
-                const review = await Review.find({ orderId: order._id });
                 return {
                     ...order.toObject(),
-                    hasReviewed: !!review,
+                    hasReviewed: reviewOrderIds.has(order._id.toString()),
                 }
             })
         )
@@ -60,6 +82,6 @@ export async function getUserOrders(req, res) {
         res.status(200).json({ orders: orderWithReviewStatus });
     } catch (error) {
         console.error("Error in createOrder controller", error);
-        res.state(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 }
