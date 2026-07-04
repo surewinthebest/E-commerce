@@ -4,7 +4,7 @@ import { Review } from "../models/review.modal.js";
 
 export async function createOrder(req, res) {
     const session = await Product.startSession();
-    session.startTransaction;
+    session.startTransaction();
     try {
         const { orderItems, shippingAddress, paymentResult, totalPrice } = req.body;
         const user = req.user;
@@ -51,7 +51,7 @@ export async function createOrder(req, res) {
             )
         }
 
-        await session.abortTransaction();
+        await session.commitTransaction();
         session.endSession();
         res.status(201).json({ message: "Order created successfully", order: order });
     } catch (error) {
@@ -67,7 +67,7 @@ export async function getUserOrders(req, res) {
         const orders = await Order.find({ clerkId: req.user.clerkId }).populate(orderItems?.product).sort({ createdAt: -1 });
         //check if each order has been reviewed 
         const orderIds = orders.map(order=> order._id);
-        const reviews = Review.find({orderId:{$in:orderIds}});
+        const reviews = await Review.find({orderId:{$in:orderIds}});
         const reviewOrderIds = new Set(reviews.map(review=> review.orderId.toString()));
 
         const orderWithReviewStatus = await Promise.all(
