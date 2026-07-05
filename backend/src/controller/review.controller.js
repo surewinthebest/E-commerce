@@ -21,6 +21,11 @@ export async function createReview(req, res) {
             return res.status(404).json({ error: "Product Not Found" });
         }
 
+        if (!user) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({ error: "User Not Found" });
+        }
 
         if (!rating || rating < 1 || rating > 5) {
             await session.abortTransaction();
@@ -54,7 +59,7 @@ export async function createReview(req, res) {
             return res.status(400).json({ error: "Product not found in this order" });
         }
 
-        const existingReview = Review.findOne({ productId, userId: req.user._id });
+        const existingReview = await Review.findOne({ productId, userId: req.user._id });
         if (existingReview) {
             await session.abortTransaction();
             session.endSession();
@@ -71,15 +76,21 @@ export async function createReview(req, res) {
         //update this product averageRating
         const allReviewsForThisProduct = await Review.find({ productId: productId });
         const finalAverageRating = allReviewsForThisProduct.reduce((sum, rev) => sum + rev.rating, 0) / allReviewsForThisProduct.length;
-
-        await Product.updateOne(product._id, {
+        const updatedProduct = await Product.findByIdAndUpdate(product._id, {
             averageRating: finalAverageRating,
             totalReviews: finalAverageRating.length,
         }, { session })
 
+        if (!updatedProduct) {
+            await session.abortTransaction();
+            session.endSession();
+            await Review.findByIdAndDelete(createReview._id);
+            return res.status(404).json({ error: "Product not found" });
+        }
+
         await session.commitTransaction();
         session.endSession();
-        res.status(200).json({ message: "Review submitted successfully", review: createReview });
+        res.status(201).json({ message: "Review submitted successfully", review: createReview });
     } catch (error) {
         console.error("Error in createReview controller", error);
         await session.abortTransaction();
@@ -94,7 +105,7 @@ export async function deleteReview(req, res) {
     try {
         const { reviewId } = req.params;
         const userId = req.user._id;
-        const review = Review.findById(reviewId);
+        const review = await Review.findById(reviewId);
 
         if (!review) {
             await session.abortTransaction();
@@ -111,7 +122,7 @@ export async function deleteReview(req, res) {
         await Review.findByIdAndDelete(reviewId, { session });
 
         //change the product averageRating and totalReviews
-        const reviews = await Review.find({ productId: product._id });
+        const reviews = await Review.find({ productId: review.productId });
         const product = await Product.findByIdAndUpdate(review.productId, {
             averageRating: reviews.length > 0 ? reviews.reduce((sum, rev) => sum + rev.rating, 0) / reviews.length : 0,
             totalReviews: reviews.length,

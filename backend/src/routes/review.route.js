@@ -6,7 +6,7 @@ const router = Router();
 
 router.use(protectRoute);
 
-router.post("/reviews", createReview);
-router.delete("/reviews:reviewId", deleteReview);
+router.post("/", createReview);
+router.delete("/:reviewId", deleteReview);
 
 export default router;

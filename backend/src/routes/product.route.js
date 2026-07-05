@@ -6,6 +6,6 @@ const router = Router();
 
 router.use(protectRoute);
 
-router.get("/products:productId", getProductById);
+router.get("/:productId", getProductById);
 
 export default router;
