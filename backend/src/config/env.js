@@ -15,5 +15,5 @@ export const ENV = {
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-    ClIENT_URL: process.env.ClIENT_URL,
+    CLIENT_URL: process.env.CLIENT_URL,
 }
