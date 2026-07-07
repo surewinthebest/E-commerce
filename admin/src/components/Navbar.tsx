@@ -1,7 +1,7 @@
 import { UserButton } from "@clerk/react";
 import { PanelLeftIcon } from "lucide-react"
 import { useLocation } from "react-router"
-import { NAVIGATION } from "../config/Navigation"
+import { NAVIGATION } from "../config/navigation"
 
 function Navbar() {
 

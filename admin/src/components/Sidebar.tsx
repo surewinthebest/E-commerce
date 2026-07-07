@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/react";
 import { ShoppingBagIcon } from "lucide-react"
 import { Link, useLocation } from "react-router";
-import { NAVIGATION } from "../config/Navigation"
+import { NAVIGATION } from "../config/navigation"
 
 function Sidebar() {
 
