@@ -4,7 +4,7 @@ import { Outlet } from "react-router"
 
 function DashboardLayout() {
     return <div className="drawer lg:drawer-open">
-        <input id="my-drawer" type="checkbox" className="drawer-toggle" defaultChecked />
+        <input id="my-drawer" type="checkbox" className="drawer-toggle" />
 
         <div className="drawer-content">
             <Navbar />
@@ -13,7 +13,7 @@ function DashboardLayout() {
                 <Outlet />
             </main>
         </div>
-        
+
         <Sidebar />
     </div>
 }

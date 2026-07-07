@@ -1,14 +1,7 @@
 import { UserButton } from "@clerk/react";
-import { ClipboardListIcon, HomeIcon, PanelLeftIcon, ShoppingBagIcon, UserIcon } from "lucide-react"
+import { PanelLeftIcon } from "lucide-react"
 import { useLocation } from "react-router"
-
-
-export const NAVIGATION = [
-    { name: "Dashboard", path: "/dashboard", icon: <HomeIcon className="size-5" /> },
-    { name: "Products", path: "/products", icon: <ShoppingBagIcon className="size-5" /> },
-    { name: "Customers", path: "/customers", icon: <ClipboardListIcon className="size-5" /> },
-    { name: "Orders", path: "/orders", icon: <UserIcon className="size-5" /> },
-]
+import { NAVIGATION } from "../config/Navigation"
 
 function Navbar() {
 

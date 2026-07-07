@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { orderApi, statsApi } from "../lib/api"
-import PageLoader from "../components/PageLoader";
-import { DollarSignIcon, ShoppingBagIcon } from "lucide-react";
+import { DollarSignIcon, ShoppingBagIcon, UsersIcon, PackageIcon } from "lucide-react";
 import { getOrderStatusBadge, capitalizeText, formatDate } from "../lib/utils";
 
 function DashboardPage() {
@@ -15,12 +14,12 @@ function DashboardPage() {
         queryFn: statsApi.getDashboard,
     });
 
-    const recentOrders = ordersData.orders.slice(0, 5) || [];
+    const recentOrders = ordersData?.orders?.slice(0, 5) || [];
 
     const statsCards = [
         {
             name: "Total Revenue",
-            value: statsLoading ? "..." : `$${statsData.totalRevenue.tofix(2)}`,
+            value: statsLoading ? "..." : `$${statsData?.totalRevenue?.toFixed(2)}`,
             icon: <DollarSignIcon className="w-8 h-8" />
         },
         {
@@ -39,12 +38,6 @@ function DashboardPage() {
             icon: <PackageIcon className="w-8 h-8" />
         },
     ]
-
-    console.log("orders:", recentOrders);
-
-    if (isLoading) return <PageLoader />
-
-    if (error) throw new Error('Network response was not ok', error);
 
     return (
         <div className="space-y-6">
@@ -85,47 +78,46 @@ function DashboardPage() {
                                         <th>Status</th>
                                         <th>Date</th>
                                     </tr>
-
-                                    <tbody>
-                                        {recentOrders.map((order) => {
-                                            return (<tr key={order._id}>
-                                                <td>
-                                                    <span className="font-medium">#{order._id.slice(-8).toUpperCase()}</span>
-                                                </td>
-
-                                                <td>
-                                                    <div>
-                                                        <div className="font-medium">{order.shippingAddress.fullname}</div>
-                                                        <div className="text-sm opacity-60">{order.orderItems.length} item(s)</div>
-                                                    </div>
-
-                                                </td>
-
-                                                <td>
-                                                    <div className="text-sm">
-                                                        {order.orderItems[0]?.name}
-                                                        {order.orderItems.length > 1 && ` +${order.orderItems.length - 1} more`}
-                                                    </div>
-                                                </td>
-
-                                                <td>
-                                                    <span className="font-semibold">{order.totalPrices.toFixed(2)}</span>
-                                                </td>
-
-                                                <td>
-                                                    <div className={`badge ${getOrderStatusBadge(order.status)}`}>
-                                                        {capitalizeText(order.status)}
-                                                    </div>
-                                                </td>
-
-                                                <td>
-                                                    <span className="text-sm opacity-60">{formatDate(order.createdAt)}</span>
-                                                </td>
-                                            </tr>
-                                            )
-                                        })}
-                                    </tbody>
                                 </thead>
+                                <tbody>
+                                    {recentOrders.map((order) => {
+                                        return (<tr key={order._id}>
+                                            <td>
+                                                <span className="font-medium">#{order._id.slice(-8).toUpperCase()}</span>
+                                            </td>
+
+                                            <td>
+                                                <div>
+                                                    <div className="font-medium">{order.shippingAddress.fullname}</div>
+                                                    <div className="text-sm opacity-60">{order.orderItems.length} item(s)</div>
+                                                </div>
+
+                                            </td>
+
+                                            <td>
+                                                <div className="text-sm">
+                                                    {order.orderItems[0]?.name}
+                                                    {order.orderItems.length > 1 && ` +${order.orderItems.length - 1} more`}
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <span className="font-semibold">{order.totalPrices.toFixed(2)}</span>
+                                            </td>
+
+                                            <td>
+                                                <div className={`badge ${getOrderStatusBadge(order.status)}`}>
+                                                    {capitalizeText(order.status)}
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <span className="text-sm opacity-60">{formatDate(order.createdAt)}</span>
+                                            </td>
+                                        </tr>
+                                        )
+                                    })}
+                                </tbody>
                             </table>
                         </div>
                     )}

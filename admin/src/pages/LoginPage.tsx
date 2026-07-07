@@ -2,9 +2,9 @@ import { SignIn } from "@clerk/react";
 
 function LoginPage() {
     return <div>
-        <h1>LoginPage</h1>
+        <h1>Sign in to Admin Dashboard</h1>
         <SignIn />
-        </div>
+    </div>
 }
 
 export default LoginPage;
