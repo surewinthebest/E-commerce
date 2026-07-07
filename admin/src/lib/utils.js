@@ -1,0 +1,34 @@
+export const capitalizeText = (text) => {
+    if(!text) return text;
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+export const getOrderStatusBadge = (status) => {
+    switch (status) {
+        case "pending":
+            return "badge-warning";
+        case "shipped":
+            return "badge-info";
+        case "delivered":
+            return "badge-success";
+        default:
+            return "badge-ghost";
+    }
+}
+
+export const getStockStatusBadge = (stock) => {
+    if (stock === 0) return { text: "Out of Stock", class: "badge-error" };
+    if (stock < 20) return { text: "Low Stock", class: "badge-warning" };
+    return { text: "In Stock", class: "badge-success" };
+}
+
+export const formatDate = (dateString) => {
+    if(!dateString) return "";
+    const date = new Date(dateString);
+    if(isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    })
+}
