@@ -1,8 +1,7 @@
 import { SignIn } from "@clerk/react";
 
 function LoginPage() {
-    return <div>
-        <h1>Sign in to Admin Dashboard</h1>
+    return <div className="h-screen hero">
         <SignIn />
     </div>
 }
