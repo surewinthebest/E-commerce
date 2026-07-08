@@ -11,7 +11,7 @@ export const productApi = {
         return data;
     },
 
-    update: async (id, formData) => {
+    update: async ({id, formData}) => {
         const { data } = await axiosInstance.put(`/admin/products/${id}`, formData);
         return data;
     },
@@ -28,7 +28,7 @@ export const orderApi = {
         return data;
     },
 
-    updateStatus: async (orderId, status) => {
+    updateStatus: async ({orderId, status}) => {
         const { data } = await axiosInstance.patch(`/admin/orders/${orderId}/status`, { status });
         return data;
     },

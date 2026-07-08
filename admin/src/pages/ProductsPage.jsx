@@ -2,7 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productApi } from "../lib/api";
 import { useState } from "react";
-import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { PencilIcon, PlusIcon, Trash2Icon, XIcon, ImageIcon } from "lucide-react";
 import { getStockStatusBadge } from "../lib/utils";
 
 function ProductsPage() {
@@ -42,7 +42,7 @@ function ProductsPage() {
     })
 
     const deleteProductMutation = useMutation({
-        queryFn: productApi.delete,
+        mutationFn: productApi.delete,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
         }
@@ -78,6 +78,12 @@ function ProductsPage() {
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length > 3) return alert("Maximum 3 imaged allowed");
+
+        //Revoke previous blob URLs to free memory
+        imagePreviews.forEach((url) => {
+            if (url.startWith("blob:")) URL.revokeObjectURL(url)
+        })
+
         setImages(files);
         setImagePreviews(files.map((file) => URL.createObjectURL(file)));
     }
@@ -98,7 +104,7 @@ function ProductsPage() {
         formDataToSend.append("description", formData.description);
 
         //Only append new image if they were selected
-        if (images.length > 0) images.forEach(image => ormDataToSend.append("images", image));
+        if (images.length > 0) images.forEach(image => formDataToSend.append("images", image));
 
         if (editingProduct) {
             updateProductMutation.mutate({ id: editingProduct._id, formData: formDataToSend });
@@ -126,13 +132,13 @@ function ProductsPage() {
                 const status = getStockStatusBadge(product.stock);
                 return (<div key={product._id} className="card bg-base-100 shadow-xl">
                     <div className="card-body">
-                        <div className="avartar">
+                        <div className="avatar">
                             <div className="w-20 rounded-xl">
                                 <img src={product.images[0]} alt={product.name} />
                             </div>
                         </div>
 
-                        <div className="flex -1">
+                        <div className="flex-1">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <h3 className="">{product.name}</h3>
@@ -156,7 +162,7 @@ function ProductsPage() {
                         </div>
 
                         <div className="card-actions">
-                            <button className="btn btn-square btn-ghost">
+                            <button className="btn btn-square btn-ghost" onClick={() => handleEdit(product)}>
                                 <PencilIcon className="w-5 h-5" />
                             </button>
                             <button className="btn btn-square btn-ghost text-error"

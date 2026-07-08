@@ -95,13 +95,22 @@ export async function updateProduct(req, res) {
 
 export async function deleteProduct(req, res) {
     try {
-        const {id} = req.params;
+        const { id } = req.params;
         const product = await Product.findById(id);
 
-        if(!product) return res.status(404).json({ error: "Product not found" });
+        if (!product) return res.status(404).json({ error: "Product not found" });
 
-        await Product.deleteOne(id);
+        //delete image from cloudinary
+        if (!product.images || product.images.length === 0) {
+            const deletePromises = product.images.map((imageUrl) => {
+                //Extract public_id from URL (assume format: .../products/publicId.ext)
+                const publicId = "products/" + imageUrl.split("products/")[1]?.split(".")[0];
+                if (publicId) return cloudinary.uploader.destroy(productId);
+            })
+            await Promise.all(deletePromises.filter(Boolean));
+        }
 
+        await Product.findByIdAndDelete(id);
         res.status(200).json({ message: "Product deleted successfully" });
     } catch (error) {
         console.error("Error in deleteProduct controller", error);
