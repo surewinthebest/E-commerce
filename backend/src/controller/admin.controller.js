@@ -101,11 +101,11 @@ export async function deleteProduct(req, res) {
         if (!product) return res.status(404).json({ error: "Product not found" });
 
         //delete image from cloudinary
-        if (!product.images || product.images.length === 0) {
+        if (product.images && product.images.length > 0) {
             const deletePromises = product.images.map((imageUrl) => {
                 //Extract public_id from URL (assume format: .../products/publicId.ext)
                 const publicId = "products/" + imageUrl.split("products/")[1]?.split(".")[0];
-                if (publicId) return cloudinary.uploader.destroy(productId);
+                if (publicId) return cloudinary.uploader.destroy(publicId);
             })
             await Promise.all(deletePromises.filter(Boolean));
         }

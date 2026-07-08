@@ -81,7 +81,7 @@ function ProductsPage() {
 
         //Revoke previous blob URLs to free memory
         imagePreviews.forEach((url) => {
-            if (url.startWith("blob:")) URL.revokeObjectURL(url)
+            if (url.startsWith("blob:")) URL.revokeObjectURL(url)
         })
 
         setImages(files);
