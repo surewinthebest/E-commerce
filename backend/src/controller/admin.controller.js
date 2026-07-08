@@ -1,7 +1,7 @@
 import cloudinary from "../config/cloudinary.js";
-import { Product } from "../models/product.modal.js";
-import { User } from "../models/user.modal.js";
-import { Order } from "../models/order.modal.js";
+import { Product } from "../models/product.model.js";
+import { User } from "../models/user.model.js";
+import { Order } from "../models/order.model.js";
 
 export async function createProduct(req, res) {
     try {
@@ -91,6 +91,31 @@ export async function updateProduct(req, res) {
         res.status(500).json({ message: "Internal Server Error" });
     }
 
+}
+
+export async function deleteProduct(req, res) {
+    try {
+        const { id } = req.params;
+        const product = await Product.findById(id);
+
+        if (!product) return res.status(404).json({ error: "Product not found" });
+
+        //delete image from cloudinary
+        if (product.images && product.images.length > 0) {
+            const deletePromises = product.images.map((imageUrl) => {
+                //Extract public_id from URL (assume format: .../products/publicId.ext)
+                const publicId = "products/" + imageUrl.split("products/")[1]?.split(".")[0];
+                if (publicId) return cloudinary.uploader.destroy(publicId);
+            })
+            await Promise.all(deletePromises.filter(Boolean));
+        }
+
+        await Product.findByIdAndDelete(id);
+        res.status(200).json({ message: "Product deleted successfully" });
+    } catch (error) {
+        console.error("Error in deleteProduct controller", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 }
 
 export async function getAllOrders(_, res) {

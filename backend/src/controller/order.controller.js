@@ -1,6 +1,6 @@
-import { Order } from "../models/order.modal.js";
-import { Product } from "../models/product.modal.js";
-import { Review } from "../models/review.modal.js";
+import { Order } from "../models/order.model.js";
+import { Product } from "../models/product.model.js";
+import { Review } from "../models/review.model.js";
 
 export async function createOrder(req, res) {
     const session = await Product.startSession();

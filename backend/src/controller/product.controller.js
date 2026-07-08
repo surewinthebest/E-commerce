@@ -1,4 +1,4 @@
-import { Product } from "../models/product.modal.js";
+import { Product } from "../models/product.model.js";
 
 export async function getProductById(req, res) {
     try {

@@ -1,6 +1,6 @@
 import { Inngest } from "inngest";
 import { connectDB } from "./db.js";
-import { User } from "../models/user.modal.js";
+import { User } from "../models/user.model.js";
 
 export const inngest = new Inngest({ id: "expo-e-commerce" });
 
@@ -11,6 +11,7 @@ const syncUser = inngest.createFunction(
     },
     async ({ event }) => {
         await connectDB();
+        console.log("surewin")
         const { id, email_addresses, first_name, last_name, image_url } = event.data;
         const newUser = {
             clerkId: id,
