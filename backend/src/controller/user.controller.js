@@ -1,4 +1,4 @@
-import { User } from "../models/user.modal.js";
+import { User } from "../models/user.model.js";
 
 export async function addAddress(req, res) {
     try {

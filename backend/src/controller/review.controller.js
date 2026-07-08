@@ -1,7 +1,7 @@
-import { Product } from "../models/product.modal.js";
-import { Order } from "../models/order.modal.js";
-import { User } from "../models/user.modal.js";
-import { Review } from "../models/review.modal.js";
+import { Product } from "../models/product.model.js";
+import { Order } from "../models/order.model.js";
+import { User } from "../models/user.model.js";
+import { Review } from "../models/review.model.js";
 import { startSession } from "mongoose";
 
 export async function createReview(req, res) {

@@ -1,6 +1,6 @@
 import { getAuth } from "@clerk/express";
 import { ENV } from "../config/env.js";
-import { User } from "../models/user.modal.js";
+import { User } from "../models/user.model.js";
 
 export const protectRoute = [
     async (req, res, next) => {

@@ -1,5 +1,5 @@
-import { Cart } from "../models/cart.modal.js";
-import { Product } from "../models/product.modal.js";
+import { Cart } from "../models/cart.model.js";
+import { Product } from "../models/product.model.js";
 
 export async function addToCart(req, res) {
     try {
