@@ -15,10 +15,11 @@ export default function RootLayout() {
     throw new Error('Add your Clerk Publishable Key to the .env file')
   }
 
-  return
-  <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-    <QueryClientProvider client={queryClient}>
-      <Stack screenOptions={{ headerShown: false }} />;
-    </QueryClientProvider>
-  </ClerkProvider>
+  return (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <QueryClientProvider client={queryClient}>
+        <Stack screenOptions={{ headerShown: false }} />
+      </QueryClientProvider>
+    </ClerkProvider>
+    )
 }
