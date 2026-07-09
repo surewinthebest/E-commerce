@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import "../global.css";
 
+
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
