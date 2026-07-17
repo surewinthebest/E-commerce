@@ -93,3 +93,10 @@ export interface Product {
     createdAt: string;
     updatedAt: string;
   }
+
+  export interface AddressFormTextInput {
+    label: string;
+    placeholder: string;
+    value: string;
+    action: (v: string) => void
+  }

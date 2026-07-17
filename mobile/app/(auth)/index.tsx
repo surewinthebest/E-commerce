@@ -1,77 +1,137 @@
+import AppText from "@/components/AppText";
 import useSocialAuth from "@/hooks/useSocialAuth";
-import { View, Text, Image, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Color } from "@/models/Color";
+import { Typography } from "@/models/Font";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+
+const styles = StyleSheet.create({
+  authScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgb(255, 255, 255)",
+    paddingLeft: 2,
+    paddingRight: 2,
+  },
+  authImage: {
+    width: 350,
+    height: 350,
+  },
+  btnView: {
+    marginTop: 0.75,
+    gap: 0.5,
+  },
+  btnContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 350,
+    height: 50,
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: "rgb(209,213,219)",
+    backgroundColor: "rgb(255,255,255)",
+    marginTop: 10,
+    paddingLeft: 1.5,
+    paddingRight: 1.5,
+    paddingTop: 0.5,
+    paddingBottom: 0.5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    elevation: 2, // this is for androi
+  },
+  btnfield: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  googleBtnImg: {
+    width: 50,
+    height: 50,
+    marginRight: 0.75,
+  },
+  btnText: {
+    color: Color.Black,
+  },
+  appleBtnImg: {
+    width: 30,
+    height: 30,
+    marginRight: 15,
+    left: 4,
+  },
+  textField: {
+    marginTop: 20,
+    marginLeft: 30,
+    marginRight: 30,
+    textAlign: "center",
+    color: Color.Black,
+  },
+  termAndCondition: {
+    color: Color.Blue,
+  }
+});
 
 const AuthScreen = () => {
   const { loadingStrategy, handleSocialAuth } = useSocialAuth();
 
   return (
-    <View className="px-8 flex-1 justify-center items-center bg-white">
+    <View style={styles.authScreen}>
       {/* DEMO IMAGE */}
       <Image
         source={require("../../assets/images/auth-image.png")}
-        className="size-96"
+        style={styles.authImage}
         resizeMode="contain"
       />
 
-      <View className="gap-2 mt-3">
+      <View style={styles.btnView}>
         {/* GOOGLE SIGN IN BTN */}
         <TouchableOpacity
-          className="flex-row items-center justify-center bg-white border border-gray-300 rounded-full px-6 py-2"
+          style={styles.btnContainer}
           onPress={() => handleSocialAuth("oauth_google")}
           disabled={loadingStrategy !== null}
-          style={{
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.1,
-            elevation: 2, // this is for android
-          }}
         >
           {loadingStrategy === "oauth_google" ? (
             <ActivityIndicator size={"small"} color={"#4285f4"} />
           ) : (
-            <View className="flex-row items-center justify-center">
+            <View style={styles.btnfield}>
               <Image
                 source={require("../../assets/images/google.png")}
-                className="size-10 mr-3"
+                style={styles.googleBtnImg}
                 resizeMode="contain"
               />
-              <Text className="text-black font-medium text-base">Continue with Google</Text>
+              <AppText style={styles.btnText} typography={Typography.textSm}>Continue with Google</AppText>
             </View>
           )}
         </TouchableOpacity>
 
         {/* APPLE SIGN IN BTN */}
         <TouchableOpacity
-          className="flex-row items-center justify-center bg-white border border-gray-300 rounded-full px-6 py-3"
+          style={styles.btnContainer}
           onPress={() => handleSocialAuth("oauth_apple")}
           disabled={loadingStrategy !== null}
-          style={{
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.1,
-            elevation: 2, // this is for android
-          }}
         >
           {loadingStrategy === "oauth_apple" ? (
             <ActivityIndicator size={"small"} color={"#4285f4"} />
           ) : (
-            <View className="flex-row items-center justify-center">
+            <View style={styles.btnfield}>
               <Image
                 source={require("../../assets/images/apple.png")}
-                className="size-8 mr-3"
+                style={styles.appleBtnImg}
                 resizeMode="contain"
               />
-              <Text className="text-black font-medium text-base">Continue with Apple</Text>
+              <AppText style={styles.btnText} typography={Typography.textSm}>Continue with Apple</AppText>
             </View>
           )}
         </TouchableOpacity>
       </View>
 
-      <Text className="text-center text-gray-500 text-xs leading-4 mt-6 px-2">
-        By signing up, you agree to our <Text className="text-blue-500">Terms</Text>
+      <AppText style={styles.textField} typography={Typography.textXs}>
+        By signing up, you agree to our <AppText style={styles.termAndCondition} typography={Typography.textXs}>Terms</AppText>
         {", "}
-        <Text className="text-blue-500">Privacy Policy</Text>
+        <AppText style={styles.termAndCondition} typography={Typography.textXs}>Privacy Policy</AppText>
         {", and "}
-        <Text className="text-blue-500">Cookie Use</Text>
-      </Text>
+        <AppText style={styles.termAndCondition} typography={Typography.textXs}>Cookie Use</AppText>
+      </AppText>
     </View>
   );
 };
