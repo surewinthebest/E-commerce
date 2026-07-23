@@ -1,6 +1,6 @@
 import { useApi } from "@/lib/api";
 import { Cart } from "@/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useCart = () => {
     const api = useApi();
@@ -80,7 +80,7 @@ const useCart = () => {
         addToCart: addToCart.mutate,
         updateItemQuantity: updateItemQuantity.mutate,
         removeCartItems: removeCartItems.mutate,
-        deleteCart: deleteCart.mutate,
+        deleteCart: deleteCart.mutateAsync,
         isAddingToCart: addToCart.isPending,
         isUpdating: updateItemQuantity.isPending,
         isRemoving: removeCartItems.isPending,

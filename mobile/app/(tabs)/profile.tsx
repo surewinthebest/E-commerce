@@ -195,7 +195,7 @@ const ProfileScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.btnContainer}
-            onPress={() => router.push("/profile")}>
+            onPress={() => router.push("/PrivacyAndSecurity")}>
             <View style={styles.btnTextContainer}>
               <Ionicons name="shield-checkmark-outline" size={22} color={Color.White} />
               <AppText style={styles.btnText} typography={Typography.textSmB}>   Privacy & Security</AppText></View>

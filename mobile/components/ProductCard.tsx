@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Color } from "@/models/Color";
 import useCart from "@/hooks/useCart";
 import useWishlist from "@/hooks/useWishlist";
+import { router } from "expo-router";
 
 const styles = StyleSheet.create({
     container: {
@@ -87,6 +88,7 @@ interface Props {
 const ProductCard: React.FC<Props> = props => {
     const { product } = props;
     const { isAddingToCart, addToCart } = useCart();
+
     const handleAddToCart = (productId: string, productName: string) => {
         addToCart(
             { productId, quantity: 1 },
@@ -104,7 +106,7 @@ const ProductCard: React.FC<Props> = props => {
     const { isExistInWishlist, toggleWishlist, isAddingToWishlist, isRemovingFromWishlist } = useWishlist();
 
     return (
-        <TouchableOpacity style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={() => router.push(`/product/${product._id}`)}>
             <View style={styles.wishlistContainer}>
                 <Image
                     source={{ uri: product.images[0] }}

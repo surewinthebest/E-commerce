@@ -9,7 +9,7 @@ const useProduct = (productId: String) => {
         queryKey: ["product", productId],
         queryFn: async () => {
             const { data } = await api.get(`/products/${productId}`);
-            return data;
+            return data.product;
         },
         enabled: !!productId,
     })
