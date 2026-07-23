@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
         height: 120,
         padding: 12,
         marginBottom: 5,
-        marginTop:5,
+        marginTop: 5,
         flexDirection: "row",
         borderRadius: 20,
         backgroundColor: Color.DarkGray
@@ -131,8 +131,8 @@ const CartItemCard: React.FC<Props> = props => {
             <View style={styles.contentContainer}>
                 <AppText style={styles.text} typography={Typography.textSmB} numberOfLines={2} ellipsizeMode="tail">{item.product.name}</AppText>
                 <View style={styles.priceContainer}>
-                    <AppText style={styles.totalPrice} typography={Typography.textXlB}>{"$" +(item.product.price * item.quantity).toFixed(2)}</AppText>
-                    <AppText style={styles.eachPrice} typography={Typography.textXs}>{"$" + item.product.price.toFixed(2)} each</AppText>
+                    <AppText style={styles.totalPrice} typography={Typography.textXlB}>{"$" + (item.product.price * item.quantity).toFixed(2)}</AppText>
+                    <AppText style={styles.eachPrice} typography={Typography.textXs}>{"$" + item.product.price.toFixed(2)} {"each"}</AppText>
                 </View>
                 <View style={styles.quantityContainer}>
                     <TouchableOpacity
@@ -145,9 +145,9 @@ const CartItemCard: React.FC<Props> = props => {
                     <AppText style={styles.quantityShown} typography={Typography.textXlB}>{item.quantity}</AppText>
                     <TouchableOpacity
                         style={styles.addQuantityBtn}
-                        onPress={() => { handleQuantityChange(item.product._id, item.quantity, 1) }}>
-                        disabled={item.quantity === item.product.stock || isUpdating}
-                        {isUpdating ?
+                        onPress={() => { handleQuantityChange(item.product._id, item.quantity, 1) }}
+                        disabled={item.quantity === item.product.stock || isUpdating}>
+                        {!!isUpdating ?
                             <ActivityIndicator size="small" color={Color.White} />
                             : <Ionicons name="add" size={18} color={Color.Black} />}
                     </TouchableOpacity>
@@ -155,7 +155,7 @@ const CartItemCard: React.FC<Props> = props => {
                         style={styles.deleteBtn}
                         onPress={() => handleRemoveCartItems(item.product._id, item.product.name)}
                         disabled={isRemoving}>
-                        {isRemoving ?
+                        {!!isRemoving ?
                             <ActivityIndicator size="small" color={Color.White} />
                             : <Ionicons name="trash-bin-outline" size={15} color={Color.Red} />}
                     </TouchableOpacity>

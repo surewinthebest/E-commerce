@@ -6,7 +6,7 @@ import { Color } from "@/models/Color";
 import { Typography } from "@/models/Font";
 import { Product } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, TextInput, ScrollView, Image, FlatList, ListRenderItem, TouchableOpacity, ActivityIndicator } from "react-native";
 
 const styles = StyleSheet.create({
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   loadingContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingTop:"30%"
+    paddingTop: "30%"
   },
   loadingText: {
     color: Color.Grey,
@@ -102,7 +102,6 @@ const CATEGORIES = [
 const ShopScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-
 
   const { data: products, isLoading, isError } = useProducts();
 

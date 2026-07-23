@@ -1,8 +1,9 @@
 import { Stack } from "expo-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import * as Sentry from '@sentry/react-native';
+import { StripeProvider } from "@stripe/stripe-react-native";
 
 Sentry.init({
   dsn: 'https://cd44bf232269e88105b5e80895c4479e@o4511625800056832.ingest.us.sentry.io/4511749624496128',
@@ -23,21 +24,45 @@ Sentry.init({
   // spotlight: __DEV__,
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error: any, query) => {
+      Sentry.captureException(error, {
+        tags: {
+          type: "react-query-error",
+          queryKey: query.queryKey[0]?.toString() || "unknown",
+        },
+        extra: {
+          errorMessage: error.message,
+          statusCode: error.response?.status,
+          queryKey: query.queryKey,
+        },
+      });
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error: any) => {
+      // global error handler for all mutations
+      Sentry.captureException(error, {
+        tags: { type: "react-query-mutation-error" },
+        extra: {
+          errorMessage: error.message,
+          statusCode: error.response?.status,
+        },
+      });
+    },
+  })
+});
 
 export default Sentry.wrap(function RootLayout() {
 
-  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  
-  if (!publishableKey) {
-    throw new Error("Add your Clerk Publishable Key to the .env file");
-  }
-
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+    <ClerkProvider publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
       <QueryClientProvider client={queryClient}>
-        <Stack screenOptions={{ headerShown: false }} />
+        <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}>
+          <Stack screenOptions={{ headerShown: false }} />
+        </StripeProvider>
       </QueryClientProvider>
     </ClerkProvider>
-    );
-});;
+  );
+});
