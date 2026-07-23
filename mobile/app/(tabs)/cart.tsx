@@ -150,7 +150,7 @@ const CartScreen = () => {
         Alert.alert("Success", "Your payment was successful! Your order is being processed.", [
           { text: "OK", onPress: () => { } },
         ]);
-        deleteCart();
+        await deleteCart();
       }
 
     } catch (error) {

@@ -4,9 +4,7 @@ import { createPaymentIntent, handleWebhook } from "../controller/payment.contro
 
 const router = Router();
 
-router.use(protectRoute);
-
-router.post("/create-intent", createPaymentIntent);
+router.post("/create-intent", protectRoute, createPaymentIntent);
 
 // No auth needed - Stripe validates via signature
 router.post("/webhook", handleWebhook);

@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     loadingText: {
         color: Color.Grey
     },
-    loadingContainer:{
+    loadingContainer: {
 
     }
 })
@@ -357,10 +357,11 @@ const ProductDetailScreen = () => {
                 <View style={styles.totalContainer}>
                     <View style={styles.totalPriceContainer}>
                         <AppText style={styles.totalPriceLabel} typography={Typography.textXs}>{"Total Price"}</AppText>
-                        <AppText style={styles.totalPrice} typography={Typography.textXlB}>{"$" + (item?.price ?? "0.00")}</AppText>
+                        <AppText style={styles.totalPrice} typography={Typography.textXlB}>{"$" + ((item.price ?? 0) * quantity).toFixed(2)}</AppText>
                     </View>
                     <TouchableOpacity style={styles.addToCartBtn}
-                        onPress={() => onPressAddToCart(item?._id, item?.name)}>
+                        onPress={() => onPressAddToCart(item?._id, item?.name)}
+                        disabled={isAddingToCart}>
                         <Ionicons name="cart" size={20} color={Color.Black} />
                         <AppText style={styles.addToCartText} typography={Typography.textSmB}>{"Add to cart"}</AppText>
                     </TouchableOpacity>

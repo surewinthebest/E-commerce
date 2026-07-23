@@ -89,7 +89,7 @@ export async function createPaymentIntent(req, res) {
 }
 
 export async function handleWebhook(req, res) {
-    const sign = req.header["stripe_signature"];
+    const sign = req.header["stripe-signature"];
     let event;
 
     try {
@@ -104,31 +104,32 @@ export async function handleWebhook(req, res) {
 
         try {
             const { userId, clerkId, orderItems, shippingAddress, totalPrice } = paymentIntent.metadata;
+            const existingOrder = await Order.findOne({ "paymentResult.id": paymentIntent.id });
+            if (existingOrder) {
+                return res.json({ received: true });
+            }
+            const parsedOrderItems = JSON.parse(orderItems);
             const order = await Order.create({
                 user: userId,
                 clerkId: clerkId,
-                orderItems: [orderItems],
-                shippingAddress: shippingAddress,
+                orderItems: parsedOrderItems,
+                shippingAddress: JSON.parse(shippingAddress),
                 paymentResult: {
                     id: paymentIntent.id,
                     status: "succeeded",
                 },
-                totalPrice: totalPrice,
+                totalPrice: Number(totalPrice),
                 status: "pending",
             });
 
             // update product stock
-            for (const item of JSON.stringify(orderItems)) {
-                const updatedProduct = await Product.findByIdAndUpdate(
-                    {
-                        _id: item.product,
-                        stock: { $gte: item.quantity }
-                    },
-                    {
-                        $inc: { stock: -item.quantity }
-                    });
+            for (const item of parsedOrderItems) {
+                const updatedProduct = await Product.findOneAndUpdate(
+                    { _id: item.productId, stock: { $gte: item.quantity } },
+                    { $inc: { stock: -item.quantity } }
+                );
                 if (!updatedProduct) {
-                    res.status(400).send(`Insufficient product ${item.name}`);
+                    console.error(`Insufficient stock for product ${item.name}`);
                 }
             }
 

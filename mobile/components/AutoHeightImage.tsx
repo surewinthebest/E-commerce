@@ -32,7 +32,7 @@ const AutoHeightImage: React.FC<Props> = props => {
                 console.error("Fail to load the image size:", error);
             }
         );
-    }, [])
+    }, [uri])
 
     return (
         <Image

@@ -137,7 +137,7 @@ const AddressSelectModal: React.FC<Props> = props => {
         const selectedIndex = addressList.findIndex(addr => addr.isDefault);
         const remainingAddressList = addressList.toSpliced(selectedIndex, 1);
         return [defaultAddress, ...remainingAddressList];
-    }, [])
+    }, [addressList])
 
     const handleOnPressContinue = useCallback(() => {
         if (shippingAddress === "") {
