@@ -81,6 +81,7 @@ const CartScreen = () => {
   const onPressCheckout = useCallback(() => {
     if (cartItems.length === 0) return;
 
+    console.log("surewin");
     if (!addresses || addresses.length === 0) {
       Alert.alert(
         "No Address",
