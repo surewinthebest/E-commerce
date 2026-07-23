@@ -12,7 +12,6 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button, Alert, Mo
 import * as Sentry from '@sentry/react-native';
 import useAddresses from "@/hooks/useAddresses";
 import AddressSelectModal from "@/components/AddressSelectModal";
-import usePayment from "@/hooks/usePayment";
 import { PaymentIntent, useStripe } from "@stripe/stripe-react-native"
 import { useApi } from "@/lib/api";
 
