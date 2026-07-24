@@ -26,7 +26,7 @@ app.use("/api/payment", (req, res, next) => {
     } else {
         express.json()(req, res, next);
     }
-}, paymentRoutes)
+}, paymentRoutes);
 
 app.use(express.json());
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true })); //credentials:true allow the browser to send the cookie to the server with the request

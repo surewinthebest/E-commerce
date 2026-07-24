@@ -1,4 +1,6 @@
 import Stripe from "stripe";
+import mongoose from "mongoose";
+import { connectDB } from "../config/db.js";
 import { Product } from "../models/product.model.js";
 import { User } from "../models/user.model.js";
 import { Order } from "../models/order.model.js"
@@ -101,6 +103,10 @@ export async function handleWebhook(req, res) {
         const paymentIntent = event.data.object;
 
         try {
+            const isConnected = mongoose.connection.readyState === 1;
+            if (!isConnected) {
+                await connectDB();
+            }
             const { userId, clerkId, orderItems, shippingAddress, totalPrice } = paymentIntent.metadata;
             const existingOrder = await Order.findOne({ "paymentResult.id": paymentIntent.id });
             if (existingOrder) {
