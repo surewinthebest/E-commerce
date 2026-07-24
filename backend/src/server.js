@@ -18,8 +18,6 @@ const app = express();
 
 const __dirname = path.resolve();
 
-app.use(clerkMiddleware());
-
 app.use("/api/payment", (req, res, next) => {
     if (req.originalUrl === "api/payment/webhook") {
         express.raw({ type: "application/json" })(req, res, next);
@@ -29,6 +27,7 @@ app.use("/api/payment", (req, res, next) => {
 }, paymentRoutes)
 
 app.use(express.json());
+app.use(clerkMiddleware());
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true })); //credentials:true allow the browser to send the cookie to the server with the request
 
 app.use("/api/inngest", serve({ client: inngest, functions }));

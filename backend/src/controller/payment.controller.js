@@ -63,8 +63,6 @@ export async function createPaymentIntent(req, res) {
             await User.findByIdAndUpdate(user._id, { stripeCustomerId: customer.id });
         }
 
-        const validatedItemsStringify = validatedItems.map(item => item._id).join(',');
-
         const paymentIntents = await stripe.paymentIntents.create({
             amount: Math.round(total * 100), // convert to cents
             currency: "hkd",
@@ -75,7 +73,7 @@ export async function createPaymentIntent(req, res) {
             metadata: {
                 clerkId: user.clerkId,
                 userId: user._id.toString(),
-                orderItems: validatedItemsStringify,
+                orderItems: JSON.stringify(validatedItems),
                 shippingAddress: JSON.stringify(shippingAddress),
                 totalPrice: total.toFixed(2),
             },
