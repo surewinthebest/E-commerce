@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/expo";
 import axios from "axios";
 import { useCallback, useEffect } from "react";
 
-const VITE_API_URL = "http://localhost:3000/api";
+const VITE_API_URL = "https://expo-e-commerce-1tspv.sevalla.app/api";
 
 const api = axios.create({
     baseURL: VITE_API_URL,
