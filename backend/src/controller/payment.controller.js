@@ -30,13 +30,12 @@ export async function createPaymentIntent(req, res) {
                 return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
             }
 
-            const itemPrice = Number(product.price);
-            subtotal += itemPrice * item.quantity;
+            subtotal += product.price * product.quantity;
             validatedItems.push({
-                productId: product._id?.toString(),
+                product: product._id?.toString(),
                 name: product.name,
                 price: product.price,
-                quantity: item.quantity,
+                quantity: product.quantity,
                 image: product.images[0],
             })
         }
@@ -103,10 +102,6 @@ export async function handleWebhook(req, res) {
         const paymentIntent = event.data.object;
 
         try {
-            const isConnected = mongoose.connection.readyState === 1;
-            if (!isConnected) {
-                await connectDB();
-            }
             const { userId, clerkId, orderItems, shippingAddress, totalPrice } = paymentIntent.metadata;
             const existingOrder = await Order.findOne({ "paymentResult.id": paymentIntent.id });
             if (existingOrder) {
@@ -128,7 +123,7 @@ export async function handleWebhook(req, res) {
 
             // update product stock
             for (const item of parsedOrderItems) {
-                const updatedProduct = await Product.findByIdAndUpdate(item.productId, {
+                const updatedProduct = await Product.findByIdAndUpdate(item.product, {
                     $inc: { stock: -item.quantity },
                   });
                 if (!updatedProduct) {
@@ -144,5 +139,4 @@ export async function handleWebhook(req, res) {
             return res.json({ message: "Error creating order from webhook:", received: true, error: error });
         }
     }
-    // res.json({ received: true });
 }

@@ -81,7 +81,6 @@ const CartScreen = () => {
   const onPressCheckout = useCallback(() => {
     if (cartItems.length === 0) return;
 
-    console.log("surewin 2");
     if (!addresses || addresses.length === 0) {
       Alert.alert(
         "No Address",
@@ -107,13 +106,10 @@ const CartScreen = () => {
     try {
       setPaymentLoading(true);
 
-      console.log("cart", cartItems);
       const { data } = await api.post("/payment/create-intent", {
         cartItems,
         shippingAddress: shippingAddress
       });
-
-      console.log("cart", cartItems);
 
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: data.clientSecret,

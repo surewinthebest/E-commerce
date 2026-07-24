@@ -19,7 +19,11 @@ const orderItemSchema = new mongoose.Schema({
         type: Number,
         required: true,
         min: 1
-    }
+    },
+    image: {
+        type: String,
+        required: true,
+    },
 })
 
 const shippingAdressSchema = new mongoose.Schema({
@@ -50,7 +54,7 @@ const shippingAdressSchema = new mongoose.Schema({
     isDefault: {
         type: Boolean,
         default: false,
-    } 
+    }
 })
 
 const orderSchema = new mongoose.Schema({
