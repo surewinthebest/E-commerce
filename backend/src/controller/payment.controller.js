@@ -110,7 +110,7 @@ export async function handleWebhook(req, res) {
             const { userId, clerkId, orderItems, shippingAddress, totalPrice } = paymentIntent.metadata;
             const existingOrder = await Order.findOne({ "paymentResult.id": paymentIntent.id });
             if (existingOrder) {
-                return res.json({ received: true });
+                return res.json({ message: "Order is already existed", received: true });
             }
             const parsedOrderItems = JSON.parse(orderItems);
             const order = await Order.create({
@@ -122,25 +122,27 @@ export async function handleWebhook(req, res) {
                     id: paymentIntent.id,
                     status: "succeeded",
                 },
-                totalPrice: Number(totalPrice),
+                totalPrice: parseFloat(totalPrice),
                 status: "pending",
             });
 
             // update product stock
             for (const item of parsedOrderItems) {
-                const updatedProduct = await Product.findOneAndUpdate(
-                    { _id: item.productId, stock: { $gte: item.quantity } },
-                    { $inc: { stock: -item.quantity } }
-                );
+                const updatedProduct = await Product.findByIdAndUpdate(item.productId, {
+                    $inc: { stock: -item.quantity },
+                  });
                 if (!updatedProduct) {
                     console.error(`Insufficient stock for product ${item.name}`);
                 }
             }
 
             console.log("Order created successfully:", order._id);
+            return res.json({ message: "Order created successfully", received: true, data: order._id });
+
         } catch (error) {
             console.error("Error creating order from webhook:", error);
+            return res.json({ message: "Error creating order from webhook:", received: true, error: error });
         }
     }
-    res.json({ received: true });
+    // res.json({ received: true });
 }
