@@ -1,6 +1,4 @@
 import Stripe from "stripe";
-import mongoose from "mongoose";
-import { connectDB } from "../config/db.js";
 import { Product } from "../models/product.model.js";
 import { User } from "../models/user.model.js";
 import { Order } from "../models/order.model.js"
@@ -30,12 +28,12 @@ export async function createPaymentIntent(req, res) {
                 return res.status(400).json({ error: `Insufficient stock for ${product.name}` });
             }
 
-            subtotal += product.price * product.quantity;
+            subtotal += product.price * item.quantity;
             validatedItems.push({
                 product: product._id?.toString(),
                 name: product.name,
                 price: product.price,
-                quantity: product.quantity,
+                quantity: item.quantity,
                 image: product.images[0],
             })
         }
