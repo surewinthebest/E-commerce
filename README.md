@@ -36,14 +36,6 @@ $ npx expo run:android
 $ make ci
 ```
 
-## 📱 Screenshots & Demo
-
-| Product Catalog | Product Detail | Shopping Cart | Checkout & Payment |
-| :---: | :---: | :---: | :---: |
-| ![Catalog](https://via.placeholder.com/200x400.png?text=Catalog+UI) | ![Details](https://via.placeholder.com/200x400.png?text=Details+UI) | ![Cart](https://via.placeholder.com/200x400.png?text=Cart+UI) | ![Checkout](https://via.placeholder.com/200x400.png?text=Checkout+UI) |
-
----
-
 
 ## ✨ Features
 
