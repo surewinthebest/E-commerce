@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import { clerkMiddleware } from "@clerk/express";
+import { ENV } from "./config/env.js";
 import { serve } from "inngest/express";
 import cors from "cors";
 import { functions, inngest } from "./config/inngest.js";
@@ -11,7 +12,8 @@ import orderRoutes from "./routes/order.route.js";
 import reviewRoutes from "./routes/review.route.js";
 import productRoutes from "./routes/product.route.js";
 import cartRoutes from "./routes/cart.route.js";
-import { ENV } from "./config/env.js";
+import notificationRoutes from "./routes/notification.route.js";
+import aiRoutes from "./routes/ai.route.js";
 import { connectDB } from "./config/db.js";
 
 const app = express();
@@ -39,6 +41,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.get("/api/health", (req, res) => {
     res.status(200).json({ "message": "Success" })
@@ -55,7 +59,7 @@ if (ENV.NODE_ENV === "production") {
 const startServer = async () => {
     await connectDB();
     app.listen(ENV.PORT, () => {
-        console.log("server is up and running");
+        console.log("server is up and running", );
     })
 };
 
