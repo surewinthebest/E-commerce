@@ -1,0 +1,57 @@
+{
+    "cli": {
+        "version": ">= 12.0.0"
+    },
+    "build": {
+        "development": {
+            "developmentClient": true,
+            "distribution": "internal",
+            "env": {
+                "APP_ENV": "dev",
+                "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
+            }
+        },
+        "preview": {
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            }
+        },
+        "staging": {
+            "distribution": "store",
+            "channel": "staging",
+            "autoIncrement": true,
+            "env": {
+                "APP_ENV": "staging"
+            }
+        },
+        "production": {
+            "distribution": "store",
+            "channel": "production",
+            "autoIncrement": true,
+            "env": {
+                "APP_ENV": "production"
+            }
+        }
+    },
+    "submit": {
+        "staging": {
+            "ios": {
+                "appleId": "your-apple-id@company.com",
+                "ascAppId": "1234567890"
+            },
+            "android": {
+                "track": "internal"
+            }
+        },
+        "production": {
+            "ios": {
+                "appleId": "your-apple-id@example.com",
+                "ascAppId": "1234567890"
+            },
+            "android": {
+                "track": "production"
+            }
+        }
+    }
+}
