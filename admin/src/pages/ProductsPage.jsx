@@ -1,4 +1,3 @@
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productApi } from "../lib/api";
 import { useState } from "react";
@@ -20,10 +19,16 @@ function ProductsPage() {
 
     const queryClient = useQueryClient();
 
-    const { data: products = [], isLoading: productLoading } = useQuery({
+    // Safely fetch products and extract array
+    const { data: productsData, isLoading: productLoading } = useQuery({
         queryKey: ["products"],
         queryFn: productApi.getAll,
-    })
+    });
+
+    // Handle both array responses [...] and object responses { products: [...] }
+    const products = Array.isArray(productsData)
+        ? productsData
+        : productsData?.products || [];
 
     const createProductMutation = useMutation({
         mutationFn: productApi.create,
@@ -31,7 +36,7 @@ function ProductsPage() {
             closeModal();
             queryClient.invalidateQueries({ queryKey: ["products"] });
         }
-    })
+    });
 
     const updateProductMutation = useMutation({
         mutationFn: productApi.update,
@@ -39,14 +44,14 @@ function ProductsPage() {
             closeModal();
             queryClient.invalidateQueries({ queryKey: ["products"] });
         }
-    })
+    });
 
     const deleteProductMutation = useMutation({
         mutationFn: productApi.delete,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
         }
-    })
+    });
 
     const closeModal = () => {
         setShowModal(false);
@@ -60,38 +65,38 @@ function ProductsPage() {
         });
         setImages([]);
         setImagePreviews([]);
-    }
+    };
 
     const handleEdit = (product) => {
         setEditingProduct(product);
         setFormData({
-            name: product.name,
-            category: product.category,
-            price: product.price.toString(),
-            stock: product.stock.toString(),
-            description: product.description,
+            name: product.name || "",
+            category: product.category || "",
+            price: product.price?.toString() || "",
+            stock: product.stock?.toString() || "",
+            description: product.description || "",
         });
-        setImagePreviews(product.images);
+        setImagePreviews(product.images || []);
         setShowModal(true);
-    }
+    };
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
-        if (files.length > 3) return alert("Maximum 3 imaged allowed");
+        if (files.length > 3) return alert("Maximum 3 images allowed");
 
-        //Revoke previous blob URLs to free memory
+        // Revoke previous blob URLs to free memory
         imagePreviews.forEach((url) => {
-            if (url.startsWith("blob:")) URL.revokeObjectURL(url)
-        })
+            if (url?.startsWith("blob:")) URL.revokeObjectURL(url);
+        });
 
         setImages(files);
         setImagePreviews(files.map((file) => URL.createObjectURL(file)));
-    }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        //for new product, require images
+        // For new product, require images
         if (!editingProduct && imagePreviews.length === 0) {
             return alert("Please upload at least one image");
         }
@@ -103,242 +108,273 @@ function ProductsPage() {
         formDataToSend.append("stock", formData.stock);
         formDataToSend.append("description", formData.description);
 
-        //Only append new image if they were selected
-        if (images.length > 0) images.forEach(image => formDataToSend.append("images", image));
+        // Only append new images if selected
+        if (images.length > 0) {
+            images.forEach(image => formDataToSend.append("images", image));
+        }
 
         if (editingProduct) {
             updateProductMutation.mutate({ id: editingProduct._id, formData: formDataToSend });
         } else {
             createProductMutation.mutate(formDataToSend);
         }
-    }
+    };
 
-    return <div className="space-y-6">
-        {/* HEADER */}
-        <div>
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Products</h1>
-                <p className="text-base-content/70 mt-1">Manage your product inventory</p>
-            </div>
-            <button onClick={() => setShowModal(true)} className="btn btn-primary gap-2">
-                <PlusIcon className="w-5 h-5" />
-                Add Product
-            </button>
-        </div>
-
-        {/* PRODUCTS GRID */}
-        <div className="grid grid-cols-1 gap-4">
-            {products.map((product) => {
-                const status = getStockStatusBadge(product.stock);
-                return (<div key={product._id} className="card bg-base-100 shadow-xl">
-                    <div className="card-body">
-                        <div className="avatar">
-                            <div className="w-20 rounded-xl">
-                                <img src={product.images[0]} alt={product.name} />
-                            </div>
-                        </div>
-
-                        <div className="flex-1">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <h3 className="">{product.name}</h3>
-                                    <p className="">{product.category}</p>
-                                </div>
-                                <div className={`badge ${status.class}`}>{status.text}</div>
-                            </div>
-
-                            <div className="flex items-center gap-6 mt-4">
-                                <div>
-                                    <p className="text-xs text-base-content/70">Price</p>
-                                    <p className="font-bold text-lg">${product.price}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-base-content/70">Stock</p>
-                                    <p className="font-bold text-lg">{product.stock} unit(s)</p>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div className="card-actions">
-                            <button className="btn btn-square btn-ghost" onClick={() => handleEdit(product)}>
-                                <PencilIcon className="w-5 h-5" />
-                            </button>
-                            <button className="btn btn-square btn-ghost text-error"
-                                onClick={() => { deleteProductMutation.mutate(product._id) }}>
-                                {deleteProductMutation.isPending ? <span className="loading loading-spinner"></span> : <Trash2Icon className="w-5 h-5" />}
-                            </button>
-                        </div>
-
-                    </div>
-                </div>);
-            })}
-        </div>
-
-        {/* ADD/EDIT PRODUCT MODAL */}
-        <input type="checkbox" className="modal-toggle" checked={showModal} />
-
-        <div className="modal">
-            <div className="modal-box max-w-2xl">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-2xl">
-                        {editingProduct ? "Edit Product" : "Add New Product"}
-                    </h3>
-
-                    <button onClick={closeModal} className="btn btn-sm btn-circle btn-ghost">
-                        <XIcon className="w-5 h-5" />
+    return (
+        <div className="space-y-6">
+            {/* HEADER */}
+            <div>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-bold">Products</h1>
+                    <button onClick={() => setShowModal(true)} className="btn btn-primary gap-2">
+                        <PlusIcon className="w-5 h-5" />
+                        Add Product
                     </button>
                 </div>
+                <p className="text-base-content/70 mt-1">Manage your product inventory</p>
+            </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="form-control">
-                            <label className="label">
-                                <span>Product Name</span>
-                            </label>
+            {/* PRODUCTS GRID */}
+            {productLoading ? (
+                <div className="flex justify-center py-12">
+                    <span className="loading loading-spinner loading-lg" />
+                </div>
+            ) : products.length === 0 ? (
+                <div className="text-center py-12 text-base-content/60">
+                    <p className="text-xl font-semibold mb-2">No products found</p>
+                    <p className="text-sm">Click "Add Product" to create your first item.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 gap-4">
+                    {products.map((product) => {
+                        const status = getStockStatusBadge(product?.stock ?? 0) || { class: "badge-ghost", text: "Unknown" };
+                        const primaryImage = product?.images?.[0] || "https://via.placeholder.com/150";
 
-                            <input
-                                type="text"
-                                placeholder="Enter product name"
-                                className="input input-bordered"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-control">
-                            <label className="label">
-                                <span>Category</span>
-                            </label>
-                            <select
-                                className="select select-bordered"
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                required
-                            >
-                                <option value="">Select category</option>
-                                <option value="Electronics">Electronics</option>
-                                <option value="Accessories">Accessories</option>
-                                <option value="Fashion">Fashion</option>
-                                <option value="Sports">Sports</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="form-control">
-                            <label className="label">
-                                <span>Price ($)</span>
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
-                                className="input input-bordered"
-                                value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                required
-                            />
-                        </div>
-
-                        <div className="form-control">
-                            <label className="label">
-                                <span>Stock</span>
-                            </label>
-                            <input
-                                type="number"
-                                placeholder="0"
-                                className="input input-bordered"
-                                value={formData.stock}
-                                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="form-control flex flex-col gap-2">
-                        <label className="label">
-                            <span>Description</span>
-                        </label>
-                        <textarea
-                            className="textarea textarea-bordered h-24 w-full"
-                            placeholder="Enter product description"
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-control">
-                        <label className="label">
-                            <span className="label-text font-semibold text-base flex items-center gap-2">
-                                <ImageIcon className="h-5 w-5" />
-                                Product Images
-                            </span>
-                            <span className="label-text-alt text-xs opacity-60">Max 3 images</span>
-                        </label>
-
-                        <div className="bg-base-200 rounded-xl p-4 border-2 border-dashed border-base-300 hover:border-primary transition-colors">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleImageChange}
-                                className="file-input file-input-bordered file-input-primary w-full"
-                                required={!editingProduct}
-                            />
-
-                            {editingProduct && (
-                                <p className="text-xs text-base-content/60 mt-2 text-center">
-                                    Leave empty to keep current images
-                                </p>
-                            )}
-                        </div>
-
-                        {imagePreviews.length > 0 && (
-                            <div className="flex gap-2 mt-2">
-                                {imagePreviews.map((preview, index) => (
-                                    <div key={index} className="avatar">
-                                        <div className="w-20 rounded-lg">
-                                            <img src={preview} alt={`Preview ${index + 1}`} />
+                        return (
+                            <div key={product._id} className="card bg-base-100 shadow-xl">
+                                <div className="card-body flex-row items-center gap-4">
+                                    <div className="avatar">
+                                        <div className="w-20 rounded-xl bg-base-200">
+                                            <img src={primaryImage} alt={product.name || "Product"} />
                                         </div>
                                     </div>
-                                ))}
+
+                                    <div className="flex-1">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h3 className="font-bold text-lg">{product.name}</h3>
+                                                <p className="text-sm text-base-content/70">{product.category}</p>
+                                            </div>
+                                            <div className={`badge ${status.class}`}>{status.text}</div>
+                                        </div>
+
+                                        <div className="flex items-center gap-6 mt-4">
+                                            <div>
+                                                <p className="text-xs text-base-content/70">Price</p>
+                                                <p className="font-bold text-lg">
+                                                    ${Number(product.price || 0).toFixed(2)}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-base-content/70">Stock</p>
+                                                <p className="font-bold text-lg">{product.stock ?? 0} unit(s)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="card-actions">
+                                        <button 
+                                            className="btn btn-square btn-ghost" 
+                                            onClick={() => handleEdit(product)}
+                                        >
+                                            <PencilIcon className="w-5 h-5" />
+                                        </button>
+                                        <button 
+                                            className="btn btn-square btn-ghost text-error"
+                                            onClick={() => deleteProductMutation.mutate(product._id)}
+                                            disabled={deleteProductMutation.isPending}
+                                        >
+                                            {deleteProductMutation.isPending ? (
+                                                <span className="loading loading-spinner loading-xs" />
+                                            ) : (
+                                                <Trash2Icon className="w-5 h-5" />
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        )}
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* ADD/EDIT PRODUCT MODAL */}
+            <input 
+                type="checkbox" 
+                className="modal-toggle" 
+                checked={showModal} 
+                onChange={() => setShowModal(!showModal)} 
+            />
+
+            <div className="modal">
+                <div className="modal-box max-w-2xl">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold text-2xl">
+                            {editingProduct ? "Edit Product" : "Add New Product"}
+                        </h3>
+
+                        <button onClick={closeModal} className="btn btn-sm btn-circle btn-ghost">
+                            <XIcon className="w-5 h-5" />
+                        </button>
                     </div>
 
-                    <div className="modal-action">
-                        <button
-                            type="button"
-                            onClick={closeModal}
-                            className="btn"
-                            disabled={createProductMutation.isPending || updateProductMutation.isPending}
-                        >
-                            Cancel
-                        </button>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="form-control">
+                                <label className="label">
+                                    <span>Product Name</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter product name"
+                                    className="input input-bordered"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    required
+                                />
+                            </div>
 
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={createProductMutation.isPending || updateProductMutation.isPending}
-                        >
-                            {createProductMutation.isPending || updateProductMutation.isPending ? (
-                                <span className="loading loading-spinner"></span>
-                            ) : editingProduct ? (
-                                "Update Product"
-                            ) : (
-                                "Add Product"
+                            <div className="form-control">
+                                <label className="label">
+                                    <span>Category</span>
+                                </label>
+                                <select
+                                    className="select select-bordered"
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    required
+                                >
+                                    <option value="">Select category</option>
+                                    <option value="Electronics">Electronics</option>
+                                    <option value="Accessories">Accessories</option>
+                                    <option value="Fashion">Fashion</option>
+                                    <option value="Sports">Sports</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="form-control">
+                                <label className="label">
+                                    <span>Price ($)</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    className="input input-bordered"
+                                    value={formData.price}
+                                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-control">
+                                <label className="label">
+                                    <span>Stock</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    placeholder="0"
+                                    className="input input-bordered"
+                                    value={formData.stock}
+                                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-control flex flex-col gap-2">
+                            <label className="label">
+                                <span>Description</span>
+                            </label>
+                            <textarea
+                                className="textarea textarea-bordered h-24 w-full"
+                                placeholder="Enter product description"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text font-semibold text-base flex items-center gap-2">
+                                    <ImageIcon className="h-5 w-5" />
+                                    Product Images
+                                </span>
+                                <span className="label-text-alt text-xs opacity-60">Max 3 images</span>
+                            </label>
+
+                            <div className="bg-base-200 rounded-xl p-4 border-2 border-dashed border-base-300 hover:border-primary transition-colors">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleImageChange}
+                                    className="file-input file-input-bordered file-input-primary w-full"
+                                    required={!editingProduct && imagePreviews.length === 0}
+                                />
+
+                                {editingProduct && (
+                                    <p className="text-xs text-base-content/60 mt-2 text-center">
+                                        Leave empty to keep current images
+                                    </p>
+                                )}
+                            </div>
+
+                            {imagePreviews.length > 0 && (
+                                <div className="flex gap-2 mt-2">
+                                    {imagePreviews.map((preview, index) => (
+                                        <div key={index} className="avatar">
+                                            <div className="w-20 rounded-lg bg-base-200">
+                                                <img src={preview} alt={`Preview ${index + 1}`} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             )}
-                        </button>
-                    </div>
-                </form>
+                        </div>
+
+                        <div className="modal-action">
+                            <button
+                                type="button"
+                                onClick={closeModal}
+                                className="btn"
+                                disabled={createProductMutation.isPending || updateProductMutation.isPending}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={createProductMutation.isPending || updateProductMutation.isPending}
+                            >
+                                {createProductMutation.isPending || updateProductMutation.isPending ? (
+                                    <span className="loading loading-spinner"></span>
+                                ) : editingProduct ? (
+                                    "Update Product"
+                                ) : (
+                                    "Add Product"
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-
-    </div>
+    );
 }
 
 export default ProductsPage;
