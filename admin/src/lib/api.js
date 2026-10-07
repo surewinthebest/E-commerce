@@ -44,6 +44,20 @@ export const customerApi = {
 export const statsApi = {
     getDashboard: async () => {
         const { data } = await axiosInstance.get("/admin/stats");
-        return data
+        return data;
     }
 }
+
+export const notificationApi = {
+    // Fetch notification broadcast history
+    getHistory: async () => {
+        const { data } = await axiosInstance.get("/notifications/history");
+        return data;
+    },
+
+    // Dispatch a push notification
+    send: async (payload) => {
+        const { data } = await axiosInstance.post("/notifications/send", payload);
+        return data;
+    },
+};
