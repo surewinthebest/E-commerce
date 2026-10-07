@@ -1,8 +1,7 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { useApi } from '@/lib/api';
+import { useApi } from '@/src/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Address } from '@/types';
+import { Address } from '@/src/types';
+import { CACHE_KEYS, CacheManager } from '../lib/cache';
 
 const useAddresses = () => {
     const api = useApi();
@@ -12,8 +11,11 @@ const useAddresses = () => {
         queryKey: ["addresses"],
         queryFn: async () => {
             const { data } = await api.get<{ addresses: Address[] }>("/users/addresses");
+            CacheManager.setObject(CACHE_KEYS.ADDRESSES, data.addresses);
             return data.addresses;
-        }
+        },
+        refetchOnWindowFocus: false,
+        initialData: () => CacheManager.getObject(CACHE_KEYS.ADDRESSES) ?? undefined,
     });
 
     const addAddress = useMutation({

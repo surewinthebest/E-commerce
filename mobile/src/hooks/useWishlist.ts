@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Product } from "@/types";
-import { useApi } from "@/lib/api";
+import { Product } from "@/src/types";
+import { useApi } from "@/src/lib/api";
+import { CACHE_KEYS, CacheManager } from "../lib/cache";
 
 const useWishlist = () => {
     const api = useApi();
@@ -10,8 +11,11 @@ const useWishlist = () => {
         queryKey: ["wishlist"],
         queryFn: async () => {
             const { data } = await api.get<{ wishlist: Product[] }>("/users/wishlist");
+            CacheManager.setObject(CACHE_KEYS.WISHLIST, data.wishlist);
             return data.wishlist
-        }
+        },
+        refetchOnWindowFocus: false,
+        initialData: () => CacheManager.getObject(CACHE_KEYS.WISHLIST) ?? undefined,
     })
 
     const addToWishlist = useMutation({

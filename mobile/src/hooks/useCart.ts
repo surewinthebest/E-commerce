@@ -1,8 +1,52 @@
-import { useApi } from "@/lib/api";
-import { Cart } from "@/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useApi } from "@/src/lib/api";
+import { Cart } from "@/src/types";
+import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CACHE_KEYS, CacheManager } from "../lib/cache";
 
-const useCart = () => {
+export interface UseCartReturn {
+    // Data & Loading States
+    cart: Cart | undefined;
+    isLoading: boolean;
+    isError: boolean;
+    refetch: () => Promise<void>;
+    isRefetching: boolean;
+
+    // Financial Calculations & Totals
+    cartTotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+    cartItemCount: number;
+
+    // Mutation Actions
+    addToCart: UseMutateFunction<
+        Cart,
+        Error,
+        { productId: string; quantity?: number },
+        unknown
+    >;
+    updateItemQuantity: UseMutateFunction<
+        Cart,
+        Error,
+        { productId: string; quantity: number },
+        unknown
+    >;
+    removeCartItems: UseMutateFunction<
+        any,
+        Error,
+        string,
+        unknown
+    >;
+    deleteCart: () => Promise<any>;
+
+    // Mutation Statuses
+    isAddingToCart: boolean;
+    isUpdating: boolean;
+    isRemoving: boolean;
+    isClearing: boolean;
+}
+
+export function useCart(): UseCartReturn {
     const api = useApi();
     const queryClient = useQueryClient();
 
@@ -20,12 +64,14 @@ const useCart = () => {
         }
     });
 
-    const { data: cart, isLoading, isError } = useQuery({
+    const cartQuery = useQuery({
         queryKey: ["cart"],
         queryFn: async () => {
             const { data } = await api.get<{ cart: Cart }>("/cart");
+            CacheManager.setObject(CACHE_KEYS.CART, data.cart);
             return data.cart;
-        }
+        },
+        initialData: () => CacheManager.getObject(CACHE_KEYS.CART) ?? undefined,
     });
 
     const updateItemQuantity = useMutation({
@@ -59,6 +105,8 @@ const useCart = () => {
         }
     });
 
+    const cart = cartQuery.data;
+
     const cartTotal =
         cart?.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0) ?? 0;
 
@@ -70,8 +118,12 @@ const useCart = () => {
 
     return {
         cart,
-        isLoading,
-        isError,
+        isLoading: cartQuery.isLoading,
+        isError: cartQuery.isError,
+        refetch: async () => {
+            await cartQuery.refetch();
+        },
+        isRefetching: cartQuery.isRefetching,
         cartTotal,
         shipping,
         tax,
@@ -87,6 +139,4 @@ const useCart = () => {
         isClearing: deleteCart.isPending,
     };
 };
-
-export default useCart;
 
