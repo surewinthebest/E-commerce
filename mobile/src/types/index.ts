@@ -96,6 +96,25 @@ export interface Cart {
   updatedAt: string;
 }
 
+export interface NotificationUser {
+  _id: string;
+  name: string;
+  email: string;
+  imageUrl?: string;
+}
+
+export interface Notification {
+  _id: string;
+  title: string;
+  body: string;
+  targetType: "ALL" | "USER";
+  recipientUser?: string | NotificationUser | null; 
+  url?: string;
+  sentBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AddressFormTextInput {
   label: string;
   placeholder: string;
