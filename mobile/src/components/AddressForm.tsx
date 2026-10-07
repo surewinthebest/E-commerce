@@ -1,13 +1,12 @@
-import { View, Modal, StyleSheet, TouchableOpacity, Pressable, ScrollView, Platform, KeyboardAvoidingView, Switch, ActivityIndicator, Alert } from 'react-native'
-import React, { useState } from 'react'
-import { Color } from '@/models/Color'
+import { View, Modal, StyleSheet, TouchableOpacity, ScrollView, Platform, KeyboardAvoidingView, Switch, ActivityIndicator } from 'react-native'
+import React from 'react'
+import { Color } from '@/src/models/Color'
 import AppText from './AppText'
-import { Typography } from '@/models/Font'
+import { Typography } from '@/src/models/Font'
 import { Ionicons } from '@expo/vector-icons'
 import SafeScreen from './SafeScreen'
 import FormTextInput from './FormTextInput'
-import { Address, AddressFormTextInput } from '@/types'
-import useAddresses from '@/hooks/useAddresses'
+import { AddressFormTextInput } from '@/src/types'
 
 const styles = StyleSheet.create({
     backdrop: {
@@ -120,8 +119,8 @@ const AddressForm: React.FC<Props> = props => {
                         <View style={styles.borderline} />
 
                         <ScrollView>
-                            {formInfos.map((formInfo) => {
-                                return <FormTextInput formInfo={formInfo} />
+                            {formInfos.map((formInfo, index) => {
+                                return <React.Fragment key={`${formInfo}-${index}`}><FormTextInput formInfo={formInfo} /></React.Fragment>
                             })}
                             <View style={styles.isDefaultContainer}>
                                 <AppText style={styles.isDefaultAddressText} typography={Typography.textSmB}>{"Set as default address"}</AppText>
@@ -156,4 +155,4 @@ const AddressForm: React.FC<Props> = props => {
     )
 }
 
-export default AddressForm;
+export default React.memo(AddressForm);

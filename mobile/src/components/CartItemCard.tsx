@@ -1,11 +1,11 @@
 import { View, Image, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
-import { CartItem } from '@/types'
+import { CartItem } from '@/src/types'
 import AppText from './AppText'
-import { Typography } from '@/models/Font'
-import { Color } from '@/models/Color'
+import { Typography } from '@/src/models/Font'
+import { Color } from '@/src/models/Color'
 import { Ionicons } from '@expo/vector-icons'
-import useCart from '@/hooks/useCart'
+import { useCart } from '@/src/hooks/useCart'
 
 const styles = StyleSheet.create({
     cartItemContainer: {
@@ -44,9 +44,12 @@ const styles = StyleSheet.create({
         top: 3,
         paddingLeft: 15,
         flexDirection: "column",
+        flex: 1
     },
     text: {
-        color: Color.White
+        color: Color.White,
+        flex: 1,
+        flexShrink: 1,
     },
     priceContainer: {
         paddingVertical: 5,
@@ -166,4 +169,4 @@ const CartItemCard: React.FC<Props> = props => {
     )
 }
 
-export default CartItemCard;
+export default React.memo(CartItemCard);

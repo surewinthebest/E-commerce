@@ -1,10 +1,10 @@
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React from 'react'
-import { Address } from '@/types'
-import { Color } from '@/models/Color'
+import { Address } from '@/src/types'
+import { Color } from '@/src/models/Color'
 import AppText from './AppText'
 import { Ionicons } from '@expo/vector-icons'
-import { Typography } from '@/models/Font'
+import { Typography } from '@/src/models/Font'
 
 const styles = StyleSheet.create({
     cardContainer: {
@@ -143,4 +143,4 @@ const AdressCard: React.FC<Props> = props => {
     )
 }
 
-export default AdressCard;
+export default React.memo(AdressCard);

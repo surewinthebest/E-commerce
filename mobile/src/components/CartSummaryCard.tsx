@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import React from 'react'
 import AppText from './AppText';
-import { Color } from '@/models/Color';
-import { Typography } from '@/models/Font';
-import useCart from '@/hooks/useCart';
+import { Color } from '@/src/models/Color';
+import { Typography } from '@/src/models/Font';
+import { useCart } from '@/src/hooks/useCart';
 
 const styles = StyleSheet.create({
     summaryContainer: {
@@ -72,4 +72,4 @@ const CartSummaryCard = () => {
     )
 };
 
-export default CartSummaryCard;
+export default React.memo(CartSummaryCard);

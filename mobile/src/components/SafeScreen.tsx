@@ -1,3 +1,4 @@
+import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -18,4 +19,4 @@ const SafeScreen = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default SafeScreen;
+export default React.memo(SafeScreen);

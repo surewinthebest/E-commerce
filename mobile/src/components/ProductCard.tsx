@@ -1,12 +1,12 @@
 import { View, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from "react-native";
 import React from "react";
-import AppText from "@/components/AppText";
-import { Product } from "@/types";
-import { Typography } from "@/models/Font";
+import AppText from "@/src/components/AppText";
+import { Product } from "@/src/types";
+import { Typography } from "@/src/models/Font";
 import { Ionicons } from "@expo/vector-icons";
-import { Color } from "@/models/Color";
-import useCart from "@/hooks/useCart";
-import useWishlist from "@/hooks/useWishlist";
+import { Color } from "@/src/models/Color";
+import { useCart } from "@/src/hooks/useCart";
+import useWishlist from "@/src/hooks/useWishlist";
 import { router } from "expo-router";
 
 const styles = StyleSheet.create({
@@ -152,4 +152,4 @@ const ProductCard: React.FC<Props> = props => {
     );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard);

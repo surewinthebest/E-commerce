@@ -1,9 +1,9 @@
 import { View, TextInput, StyleSheet } from "react-native";
 import React from "react";
 import AppText from "./AppText";
-import { Color } from "@/models/Color";
-import { Typography } from "@/models/Font";
-import { AddressFormTextInput } from "@/types";
+import { Color } from "@/src/models/Color";
+import { Typography } from "@/src/models/Font";
+import { AddressFormTextInput } from "@/src/types";
 
 const styles = StyleSheet.create({
     container: {
@@ -48,4 +48,4 @@ const FormTextInput: React.FC<Props> = props => {
     )
 }
 
-export default FormTextInput;
+export default React.memo(FormTextInput);

@@ -1,10 +1,10 @@
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
-import { Color } from '@/models/Color'
+import { Color } from '@/src/models/Color'
 import { Ionicons } from '@expo/vector-icons'
 import SafeScreen from './SafeScreen'
 import AppText from './AppText'
-import { Typography } from '@/models/Font'
+import { Typography } from '@/src/models/Font'
 import { router } from 'expo-router'
 
 const styles = StyleSheet.create({
@@ -66,4 +66,4 @@ const ProfileHeader: React.FC<Props> = props => {
     )
 }
 
-export default ProfileHeader
+export default React.memo(ProfileHeader);

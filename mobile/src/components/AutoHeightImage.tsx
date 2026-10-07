@@ -1,4 +1,4 @@
-import { View, Text, Dimensions, Image, StyleSheet } from 'react-native'
+import { Dimensions, Image, StyleSheet } from 'react-native'
 import React, { useEffect, useState } from 'react'
 
 const screenWidth = Dimensions.get('window').width;
@@ -43,4 +43,4 @@ const AutoHeightImage: React.FC<Props> = props => {
     )
 }
 
-export default AutoHeightImage
+export default React.memo(AutoHeightImage);

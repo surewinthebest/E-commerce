@@ -1,7 +1,7 @@
 import { TextProps, StyleSheet } from "react-native";
 import React from "react";
 import InvariantSizeText from "./InvariantSizeText";
-import { Font, Typography } from "@/models/Font";
+import { Font, Typography } from "@/src/models/Font";
 
 interface Props extends TextProps {
     typography?: Typography;

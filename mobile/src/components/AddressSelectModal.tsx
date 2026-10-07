@@ -1,12 +1,10 @@
 import { StyleSheet, View, Modal, TouchableOpacity, ActivityIndicator, ScrollView, Alert, Pressable } from 'react-native'
-import React, { useCallback, useMemo, useState } from 'react'
-import SafeScreen from './SafeScreen'
-import { Color } from '@/models/Color';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Color } from '@/src/models/Color';
 import AppText from './AppText';
-import { Typography } from '@/models/Font';
+import { Typography } from '@/src/models/Font';
 import { Ionicons } from '@expo/vector-icons';
-import { Address, CartItem, ShippingAddress } from '@/types';
-import useAddresses from '@/hooks/useAddresses';
+import { Address, ShippingAddress } from '@/src/types';
 
 const styles = StyleSheet.create({
     overlay: {
@@ -137,7 +135,14 @@ const AddressSelectModal: React.FC<Props> = props => {
         const selectedIndex = addressList.findIndex(addr => addr.isDefault);
         const remainingAddressList = addressList.toSpliced(selectedIndex, 1);
         return [defaultAddress, ...remainingAddressList];
-    }, [addressList])
+    }, [addressList]);
+
+    // Auto-select the first (or default) address when modal becomes visible
+    useEffect(() => {
+        if (visible && reorderedAddressList && reorderedAddressList.length > 0) {
+            setShippingAddress(reorderedAddressList[0]._id);
+        }
+    }, [visible, reorderedAddressList]);
 
     const handleOnPressContinue = useCallback(() => {
         if (shippingAddress === "") {
@@ -157,7 +162,7 @@ const AddressSelectModal: React.FC<Props> = props => {
             phoneNumber: selected.phoneNumber,
         }
         onPressContinue(selectedAddress);
-    }, [shippingAddress])
+    }, [shippingAddress, addressList, onPressContinue]);
 
     return (
         <Modal key={id} visible={visible} animationType="slide" transparent onRequestClose={onClose}>

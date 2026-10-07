@@ -1,12 +1,12 @@
 import { View, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import React, { useState } from 'react'
-import { Product } from '@/types'
-import { Color } from '@/models/Color'
-import { Typography } from '@/models/Font'
+import { Product } from '@/src/types'
+import { Color } from '@/src/models/Color'
+import { Typography } from '@/src/models/Font'
 import AppText from './AppText'
 import { Ionicons } from '@expo/vector-icons'
-import useWishlist from '@/hooks/useWishlist'
-import useCart from '@/hooks/useCart'
+import useWishlist from '@/src/hooks/useWishlist'
+import { useCart } from '@/src/hooks/useCart'
 
 const styles = StyleSheet.create({
     wishlistItemContainer: {
@@ -103,7 +103,7 @@ const WishlistCard: React.FC<Props> = props => {
     const { item } = props;
     const { removeFromWishlist, isRemovingFromWishlist } = useWishlist();
     const [nameHeight, setNameHeight] = useState(0);
-    const { addToCart, isAddingToCart } = useCart();
+    const { addToCart } = useCart();
 
     const handleRemove = () => {
         Alert.alert("Remove Item", `Are you sure to remove ${item.name}?`, [
@@ -128,7 +128,7 @@ const WishlistCard: React.FC<Props> = props => {
                 }
             }
         );
-        return 
+        return
 
     }
 
@@ -170,4 +170,4 @@ const WishlistCard: React.FC<Props> = props => {
     )
 }
 
-export default WishlistCard
+export default React.memo(WishlistCard);
