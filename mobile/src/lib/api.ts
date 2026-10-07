@@ -1,11 +1,10 @@
 import { useAuth } from "@clerk/expo";
-import axios from "axios";
-import { useCallback, useEffect } from "react";
+import { create } from "axios";
+import { useEffect } from "react";
 
-const VITE_API_URL = "https://expo-e-commerce-1tspv.sevalla.app/api";
-
-const api = axios.create({
-    baseURL: VITE_API_URL,
+const api = create({
+    baseURL: process.env.EXPO_PUBLIC_API_URL,
+    //config.ExpoPublicApiUrl,
     headers: {
         "Content-Type": "application/json"
     },
