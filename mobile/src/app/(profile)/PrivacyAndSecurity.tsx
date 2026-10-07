@@ -1,10 +1,12 @@
-import { View, StyleSheet, Switch, ScrollView, TouchableOpacity } from 'react-native'
-import React, { ComponentProps, useEffect, useState } from 'react'
-import ProfileHeader from '@/components/ProfileHeader';
-import AppText from '@/components/AppText';
-import { Typography } from '@/models/Font';
-import { Color } from '@/models/Color';
+import { View, StyleSheet, Switch, ScrollView, TouchableOpacity, Alert, Linking, Platform } from 'react-native'
+import React, { ComponentProps, useState, useEffect } from 'react'
+import * as Notifications from 'expo-notifications';
+import ProfileHeader from '@/src/components/ProfileHeader';
+import AppText from '@/src/components/AppText';
+import { Typography } from '@/src/models/Font';
+import { Color } from '@/src/models/Color';
 import { Ionicons } from '@expo/vector-icons';
+import usePushNotification from '@/src/hooks/usePushNotification';
 
 const styles = StyleSheet.create({
     scrollView: {
@@ -108,6 +110,7 @@ interface settingScreen {
 }
 
 const PrivacyAndSecurity = () => {
+    const { syncPushToken } = usePushNotification();
     const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
     const [biometricEnabled, setBiometricEnabled] = useState(false);
     const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(false);
@@ -116,8 +119,61 @@ const PrivacyAndSecurity = () => {
     const [shareDataEnabled, setShareDataEnabled] = useState(false);
 
     useEffect(() => {
+        const checkInitialPermissions = async () => {
+            const { status } = await Notifications.getPermissionsAsync();
+            setPushNotificationsEnabled(status === 'granted');
+        };
+        checkInitialPermissions();
+    }, []);
 
-    }, [])
+    const handlePushNotificationToggle = async (value: boolean) => {
+        if (value) {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+
+            if (existingStatus !== 'granted') {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+            }
+
+            if (finalStatus === 'granted') {
+                setPushNotificationsEnabled(true);
+                try {
+                    const token = (await Notifications.getExpoPushTokenAsync()).data;
+                    console.log('Push token acquired:', token);
+                    if (token) {
+                        console.log('Expo Push Token:', token);
+                        syncPushToken(token).catch((error) => {
+                          console.error('Error syncing push token:', error);
+                        });
+                      }
+                } catch (error) {
+                    console.error('Error fetching push token:', error);
+                }
+            } else {
+                setPushNotificationsEnabled(false);
+                Alert.alert(
+                    'Permission Required',
+                    'Push notifications are disabled in your device settings. Please turn them on to receive updates.',
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        { 
+                            text: 'Open Settings', 
+                            onPress: () => {
+                                if (Platform.OS === 'ios') {
+                                    Linking.openURL('app-settings:');
+                                } else {
+                                    Linking.openSettings();
+                                }
+                            } 
+                        }
+                    ]
+                );
+            }
+        } else {
+            setPushNotificationsEnabled(false);
+        }
+    };
 
     const securityFn: settingFunction[] = [
         {
@@ -210,7 +266,7 @@ const PrivacyAndSecurity = () => {
         { header: "Account", fns: accountSettings },
     ]
 
-    const onPressToggle = (id: string, value: boolean) => {
+    const onPressToggle = async (id: string, value: boolean) => {
         switch (id) {
             case "two-factor":
                 setTwoFactorEnabled(value);
@@ -219,7 +275,7 @@ const PrivacyAndSecurity = () => {
                 setBiometricEnabled(value);
                 break;
             case "push-noti":
-                setPushNotificationsEnabled(value);
+                await handlePushNotificationToggle(value);
                 break;
             case "email":
                 setEmailNotificationsEnabled(value);
@@ -235,10 +291,9 @@ const PrivacyAndSecurity = () => {
 
     return (
         <ProfileHeader screenTitle={"Privacy & Security"}>
-            <ScrollView style={styles.scrollView}>
-
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 {settingFn.map((s) => {
-                    return <>
+                    return <React.Fragment key={s.header}>
                         <AppText style={styles.header} typography={Typography.textBaseB}>{s.header}</AppText>
                         {s.fns.map((fn) => {
                             return (<View key={fn.id} style={styles.functionContainer}>
@@ -261,7 +316,7 @@ const PrivacyAndSecurity = () => {
                                     />}
                             </View>)
                         })}
-                    </>
+                    </React.Fragment>
                 })}
 
                 {/* Delete Account */}
@@ -289,4 +344,4 @@ const PrivacyAndSecurity = () => {
     )
 };
 
-export default PrivacyAndSecurity;
+export default React.memo(PrivacyAndSecurity);

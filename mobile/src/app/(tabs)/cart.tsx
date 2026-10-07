@@ -1,19 +1,22 @@
-import AppText from "@/components/AppText";
-import CartItemCard from "@/components/CartItemCard";
-import CartSummaryCard from "@/components/CartSummaryCard";
-import SafeScreen from "@/components/SafeScreen";
-import useCart from "@/hooks/useCart";
-import { Color } from "@/models/Color";
-import { Typography } from "@/models/Font";
-import { Address, CartItem, ShippingAddress } from "@/types";
+import AppText from "@/src/components/AppText";
+import CartItemCard from "@/src/components/CartItemCard";
+import CartSummaryCard from "@/src/components/CartSummaryCard";
+import SafeScreen from "@/src/components/SafeScreen";
+import { useCartContext } from "@/src/context/CartContext";
+import { useCart } from "@/src/hooks/useCart";
+import { Color } from "@/src/models/Color";
+import { Typography } from "@/src/models/Font";
+import { CartItem, ShippingAddress } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
-import { Fragment, useCallback, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button, Alert, Modal, ActivityIndicator } from "react-native";
+import React, { Fragment, useCallback, useMemo, useState } from "react";
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from "react-native";
 import * as Sentry from '@sentry/react-native';
-import useAddresses from "@/hooks/useAddresses";
-import AddressSelectModal from "@/components/AddressSelectModal";
-import { PaymentIntent, useStripe } from "@stripe/stripe-react-native"
-import { useApi } from "@/lib/api";
+import useAddresses from "@/src/hooks/useAddresses";
+import AddressSelectModal from "@/src/components/AddressSelectModal";
+import { useStripe } from "@stripe/stripe-react-native"
+import { useApi } from "@/src/lib/api";
+import { sendLocalNotification } from '@/src/lib/notifications';
+import { CartSkeleton } from "@/src/components/LoadingSkeletonView";
 
 const styles = StyleSheet.create({
   screen: {
@@ -70,13 +73,17 @@ const styles = StyleSheet.create({
 })
 
 const CartScreen = () => {
-
-  const { cart, isLoading: isLoadingCart, isError, cartItemCount, total, deleteCart } = useCart();
+  const { cart, isLoading: isLoadingCart, isRefetching: isRefetchingCart, refetch: refetchCart } = useCartContext();
+  const { cartItemCount, total, deleteCart } = useCart();
   const { addresses, isLoading: isLoadingAddresses } = useAddresses();
   const api = useApi();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [addressModalVisible, setAddressModalVisible] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
+
+  const cartItems: CartItem[] = useMemo(() => {
+    return cart?.items ?? [];
+  }, [cart?.items]);
 
   const onPressCheckout = useCallback(() => {
     if (cartItems.length === 0) return;
@@ -93,15 +100,33 @@ const CartScreen = () => {
     }
 
     setAddressModalVisible(true);
-  }, [addresses]);
+  }, [addresses, cartItems.length]);
+
+  const handleCloseAddressModal = useCallback(() => {
+    setAddressModalVisible(false);
+  }, []);
+
+  // Inside CartScreen after successful payment:
+  const handlePaymentSuccess = useCallback(async () => {
+    await sendLocalNotification(
+      "Order Confirmed! 🎉",
+      "Your payment was successful and your order is being processed.",
+      // { orderId }
+    );
+  }, []);
 
   const onPressContinueToPayment = useCallback(async (shippingAddress: ShippingAddress) => {
     setAddressModalVisible(false);
 
-    Sentry.logger.info("Checkout initiated", {
-      itemCount: cartItemCount,
-      total: total.toFixed(2),
-      city: shippingAddress.city,
+    Sentry.addBreadcrumb({
+      category: "checkout",
+      message: "Checkout initiated",
+      level: "info",
+      data: {
+        itemCount: cartItemCount,
+        total: total.toFixed(2),
+        city: shippingAddress.city,
+      },
     });
 
     try {
@@ -119,11 +144,13 @@ const CartScreen = () => {
       });
 
       if (initError) {
-        Sentry.logger.error("Payment sheet init failed", {
-          errorCode: initError.code,
-          errorMessage: initError.message,
-          cartTotal: total,
-          itemCount: cartItems.length,
+        Sentry.captureException(initError, {
+          extra: {
+            errorCode: initError.code,
+            errorMessage: initError.message,
+            cartTotal: total,
+            itemCount: cartItems.length,
+          },
         });
 
         Alert.alert("Error", initError.message);
@@ -133,47 +160,72 @@ const CartScreen = () => {
 
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
-        Sentry.logger.error("Payment cancelled", {
-          errorCode: presentError.code,
-          errorMessage: presentError.message,
-          cartTotal: total,
-          itemCount: cartItems.length,
+        Sentry.addBreadcrumb({
+          category: "payment",
+          message: "Payment cancelled by user",
+          level: "info",
+          data: {
+            errorCode: presentError.code,
+            errorMessage: presentError.message,
+            cartTotal: total,
+            itemCount: cartItems.length,
+          },
         });
 
         Alert.alert("Payment cancelled", presentError.message);
       } else {
-        Sentry.logger.info("Payment successful", {
-          total: total.toFixed(2),
-          itemCount: cartItems.length,
+        Sentry.addBreadcrumb({
+          category: "payment",
+          message: "Payment successful",
+          level: "info",
+          data: {
+            total: total.toFixed(2),
+            itemCount: cartItems.length,
+          },
         });
 
         Alert.alert("Success", "Your payment was successful! Your order is being processed.", [
           { text: "OK", onPress: () => { } },
         ]);
         await deleteCart();
+        await handlePaymentSuccess();
       }
 
     } catch (error) {
-      Sentry.logger.error("Payment failed", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        cartTotal: total,
-        itemCount: cartItems.length,
+      Sentry.captureMessage("Payment failed", {
+        level: "error",
+        extra: {
+          error: error instanceof Error ? error.message : "Unknown error",
+          cartTotal: total,
+          itemCount: cartItems.length,
+        },
       });
       Alert.alert("Error", "Failed to process payment");
     } finally {
       setPaymentLoading(false);
     }
-  }, [])
+  }, [cartItemCount, total, api, cartItems, initPaymentSheet, presentPaymentSheet, deleteCart, handlePaymentSuccess]);
+
+  const itemCountUnit = cartItemCount > 1 ? "items" : "item";
+
+  if(isLoadingCart){
+    return(<CartSkeleton/>);
+  };
 
   if (!cart) return;
-
-  const cartItems: CartItem[] = cart?.items ?? [];
-  const itemCountUnit = cartItemCount > 1 ? "items" : "item";
   return (
     <View style={styles.screen}>
       <SafeScreen>
         <AppText style={styles.headerText} typography={Typography.text3XlB}>{"Cart"}</AppText>
-        <ScrollView style={styles.cartItemsContainer} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.cartItemsContainer}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetchingCart}
+              onRefresh={refetchCart}
+            />}
+        >
           {cartItems.length > 0 ? cartItems.map((item) => {
             return <Fragment key={item._id}><CartItemCard item={item} /></Fragment>
           }) : null}
@@ -190,8 +242,11 @@ const CartScreen = () => {
             </View>
             <AppText style={styles.totalPrice} typography={Typography.textBaseB}>{"$"}{total.toFixed(2)}</AppText>
           </View>
-          <TouchableOpacity style={styles.checkoutBtn} onPress={() => onPressCheckout()}>
-            {isLoadingCart ? <ActivityIndicator size="small" color={Color.ProfileGray} />
+          <TouchableOpacity
+            style={styles.checkoutBtn}
+            onPress={() => onPressCheckout()}
+            disabled={isLoadingCart || paymentLoading}>
+            {isLoadingCart || paymentLoading ? <ActivityIndicator size="small" color={Color.ProfileGray} />
               : <AppText style={styles.checkoutBtnText} typography={Typography.textBaseB}>{"Checkout →"}</AppText>}
 
           </TouchableOpacity>
@@ -201,9 +256,7 @@ const CartScreen = () => {
           visible={addressModalVisible}
           addressList={addresses}
           isLoadingAddresses={isLoadingAddresses}
-          onClose={() => {
-            setAddressModalVisible(false);
-          }}
+          onClose={handleCloseAddressModal}
           onPressContinue={(addr) => onPressContinueToPayment(addr)}
         />}
       </SafeScreen>
@@ -211,4 +264,4 @@ const CartScreen = () => {
   );
 };
 
-export default CartScreen;
+export default React.memo(CartScreen);

@@ -1,13 +1,14 @@
-import AppText from "@/components/AppText";
-import ProductCard from "@/components/ProductCard";
-import SafeScreen from "@/components/SafeScreen";
-import useProducts from "@/hooks/useProducts";
-import { Color } from "@/models/Color";
-import { Typography } from "@/models/Font";
-import { Product } from "@/types";
+import AppText from "@/src/components/AppText";
+import { ShopSkeleton } from "@/src/components/LoadingSkeletonView";
+import ProductCard from "@/src/components/ProductCard";
+import SafeScreen from "@/src/components/SafeScreen";
+import useProducts from "@/src/hooks/useProducts";
+import { Color } from "@/src/models/Color";
+import { Typography } from "@/src/models/Font";
+import { Product } from "@/src/types";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { View, StyleSheet, TextInput, ScrollView, Image, FlatList, ListRenderItem, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { View, StyleSheet, TextInput, ScrollView, Image, FlatList, ListRenderItem, TouchableOpacity } from "react-native";
 
 const styles = StyleSheet.create({
   screen: {
@@ -175,10 +176,11 @@ const ShopScreen = () => {
           columnWrapperStyle={styles.flatlistRow}
           ListEmptyComponent={
             isLoading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" />
-                <AppText style={styles.loadingText} typography={Typography.textLgB}>Loading products...</AppText>
-              </View>
+              // <View style={styles.loadingContainer}>
+              //   <ActivityIndicator size="large" />
+              //   <AppText style={styles.loadingText} typography={Typography.textLgB}>Loading products...</AppText>
+              // </View>
+              <ShopSkeleton />
             ) : isError ? (
               <View style={styles.loadingContainer}>
                 <Ionicons name="alert-circle-outline" size={48} color={Color.Red} />
@@ -199,4 +201,4 @@ const ShopScreen = () => {
   );
 };
 
-export default ShopScreen;
+export default React.memo(ShopScreen);

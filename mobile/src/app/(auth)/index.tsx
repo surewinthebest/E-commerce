@@ -1,8 +1,8 @@
-import AppText from "@/components/AppText";
-import useSocialAuth from "@/hooks/useSocialAuth";
-import { Color } from "@/models/Color";
-import { Typography } from "@/models/Font";
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import AppText from "@/src/components/AppText";
+import useSocialAuth from "@/src/hooks/useSocialAuth";
+import { Color } from "@/src/models/Color";
+import { Typography } from "@/src/models/Font";
+import { View, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 
 const styles = StyleSheet.create({
   authScreen: {
@@ -14,11 +14,11 @@ const styles = StyleSheet.create({
     paddingRight: 2,
   },
   authImage: {
-    width: 350,
-    height: 350,
+    width: 550,
+    height: 550,
   },
   btnView: {
-    marginTop: 0.75,
+    bottom: 50,
     gap: 0.5,
   },
   btnContainer: {
@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
     marginRight: 30,
     textAlign: "center",
     color: Color.Black,
+    bottom: 50
   },
   termAndCondition: {
     color: Color.Blue,

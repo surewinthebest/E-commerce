@@ -1,12 +1,13 @@
-import AppText from "@/components/AppText";
-import SafeScreen from "@/components/SafeScreen";
-import { Color } from "@/models/Color";
-import { Typography } from "@/models/Font";
-import { useAuth, useUser } from "@clerk/expo";
+import AppText from "@/src/components/AppText";
+import SafeScreen from "@/src/components/SafeScreen";
+import { Color } from "@/src/models/Color";
+import { Typography } from "@/src/models/Font";
+import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { View, StyleSheet, Image, FlatList, ListRenderItem, TouchableOpacity, Alert } from "react-native";
 import { Href, router } from "expo-router";
+import { useSignOut } from "@/src/hooks/useSignOut";
 
 const styles = StyleSheet.create({
   screen: {
@@ -125,7 +126,7 @@ interface profileFunction {
 
 const ProfileScreen = () => {
   const { user } = useUser();
-  const { signOut } = useAuth();
+  const { handleLogout } = useSignOut();
 
   const profileFunction: profileFunction[] = [
     { icon: "person-outline" as const, title: "Edit Profile", color: Color.ProfileBlue, direct: "/profile" },
@@ -155,7 +156,7 @@ const ProfileScreen = () => {
       {
         text: "Sign Out",
         style: "destructive",
-        onPress: () => signOut(),
+        onPress: () => handleLogout(),
       },
     ])
   }
@@ -187,7 +188,8 @@ const ProfileScreen = () => {
         </View>
 
         <View style={styles.settingContainer}>
-          <TouchableOpacity style={styles.btnContainer}>
+          <TouchableOpacity style={styles.btnContainer}
+          onPress={() => router.push("/notifications")}>
             <View style={styles.btnTextContainer}>
               <Ionicons name="notifications-outline" size={22} color={Color.White} />
               <AppText style={styles.btnText} typography={Typography.textSmB}>   Notifications</AppText></View>
@@ -214,4 +216,4 @@ const ProfileScreen = () => {
   );
 };
 
-export default ProfileScreen;
+export default React.memo(ProfileScreen);

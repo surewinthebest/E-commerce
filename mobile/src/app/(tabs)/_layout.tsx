@@ -1,12 +1,12 @@
 import { Redirect, Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAuth } from "@clerk/expo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import { StyleSheet } from "react-native";
-import { Typography } from "@/models/Font";
-import { textStyle } from "@/components/AppText";
-import { Color } from "@/models/Color";
+import { Typography } from "@/src/models/Font";
+import { textStyle } from "@/src/components/AppText";
+import { Color } from "@/src/models/Color";
 
 const styles = StyleSheet.create({
   tabBarContainer: {
@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderTopWidth: 0,
     paddingTop: 4,
-    marginHorizontal: 100,
+    marginHorizontal: 70,
     borderRadius: 24,
     overflow: "hidden",
   }
@@ -72,6 +72,13 @@ const TabsLayout = () => {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="ai-chat"
+        options={{
+          title: "AI Chat",
+          tabBarIcon: ({ color, size }) => <Ionicons name="chatbox" size={size} color={color} />,
         }}
       />
     </Tabs>

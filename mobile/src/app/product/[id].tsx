@@ -1,15 +1,14 @@
 import { View, Image, StyleSheet, Alert, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator } from 'react-native'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Product } from '@/types';
-import SafeScreen from '@/components/SafeScreen';
+import React, { useCallback, useEffect, useState } from 'react'
+import SafeScreen from '@/src/components/SafeScreen';
 import { Ionicons } from '@expo/vector-icons';
-import { Color } from '@/models/Color';
-import useWishlist from '@/hooks/useWishlist';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import AppText from '@/components/AppText';
-import { Typography } from '@/models/Font';
-import useCart from '@/hooks/useCart';
-import useProduct from '@/hooks/useProduct';
+import { Color } from '@/src/models/Color';
+import useWishlist from '@/src/hooks/useWishlist';
+import { router, useLocalSearchParams } from 'expo-router';
+import AppText from '@/src/components/AppText';
+import { Typography } from '@/src/models/Font';
+import { useCart } from '@/src/hooks/useCart';
+import useProduct from '@/src/hooks/useProduct';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get("window");
@@ -23,6 +22,7 @@ const styles = StyleSheet.create({
         position: "relative",
         overflow: "hidden",
         marginHorizontal: -25,
+        marginBottom: 25
     },
     productImage: {
         width,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
         backgroundColor: Color.ProfileGray + "90"
     },
     imageIndicatorsContainer: {
-        height: width + 70,
+        height: width + 40,
         width: width,
         position: "absolute",
         padding: 25,
@@ -66,6 +66,10 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         width: 20,
         height: 7
+    },
+    contentScrollView: {
+        marginTop: 30,
+        marginBottom: 20
     },
     catContainer: {
         marginTop: 20,
@@ -223,7 +227,6 @@ const styles = StyleSheet.create({
 
 const ProductDetailScreen = () => {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const [imageHeight, setImageHeight] = useState<number[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [catWidth, setCatWidth] = useState(0);
@@ -248,7 +251,7 @@ const ProductDetailScreen = () => {
                 }
             })
         }
-    }, [])
+    }, [addToWishlist, id, removeFromWishlist, wishlisted]);
 
     const onPressAddToCart = useCallback((productId: string, productName: string) => {
         addToCart({ productId, quantity }, {
@@ -259,11 +262,11 @@ const ProductDetailScreen = () => {
                 Alert.alert("Error", error?.response?.data?.error || "Failed to add to cart");
             }
         })
-    }, [])
+    }, [addToCart, quantity]);
 
     useEffect(() => {
         if (!item) return;
-    }, [])
+    }, [item]);
 
     if (isLoading) return <LoadingUI />;
     if (isError || !item) return <ErrorUI />;
@@ -285,8 +288,10 @@ const ProductDetailScreen = () => {
                         setSelectedImageIndex(index);
                     }}
                 >
-                    {imageList.map((img) => {
-                        return <Image style={styles.productImage} source={{ uri: img }} resizeMode='contain' />;
+                    {imageList.map((img, index) => {
+                        return <React.Fragment key={`${img}-${index}`}>
+                            <Image style={styles.productImage} source={{ uri: img }} resizeMode='contain' />
+                        </React.Fragment>;
                     })}
                 </ScrollView>
 
@@ -312,7 +317,8 @@ const ProductDetailScreen = () => {
                     ))}
                 </View>
 
-                <ScrollView>
+                <ScrollView style={styles.contentScrollView}
+                    showsVerticalScrollIndicator={false}>
                     <View style={[styles.catContainer, { width: catWidth + 20 }]}>
                         <AppText style={styles.catText}
                             typography={Typography.text2XsB}
@@ -371,7 +377,7 @@ const ProductDetailScreen = () => {
     )
 }
 
-export default ProductDetailScreen;
+export default React.memo(ProductDetailScreen);
 
 function ErrorUI() {
     return (

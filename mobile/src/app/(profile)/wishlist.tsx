@@ -1,12 +1,13 @@
-import { FlatList, ListRenderItem, ScrollView, StyleSheet } from 'react-native'
+import { FlatList, ListRenderItem, StyleSheet } from 'react-native'
 import React, { useCallback } from 'react'
-import ProfileHeader from '@/components/ProfileHeader'
-import { Typography } from '@/models/Font'
-import { Color } from '@/models/Color'
-import AppText from '@/components/AppText'
-import useWishlist from '@/hooks/useWishlist'
-import { Product } from '@/types'
-import WishlistCard from '@/components/WishlistCard'
+import ProfileHeader from '@/src/components/ProfileHeader'
+import { Typography } from '@/src/models/Font'
+import { Color } from '@/src/models/Color'
+import AppText from '@/src/components/AppText'
+import useWishlist from '@/src/hooks/useWishlist'
+import { Product } from '@/src/types'
+import WishlistCard from '@/src/components/WishlistCard'
+import { WishlistSkeleton } from '@/src/components/LoadingSkeletonView'
 
 const styles = StyleSheet.create({
     extraText: {
@@ -18,14 +19,20 @@ const styles = StyleSheet.create({
     }
 })
 
-const wishlistScreen = () => {
+const WishlistScreen = () => {
 
-    const { wishlist } = useWishlist();
+    const { wishlist, isLoading: isLoadingWishlist } = useWishlist();
     const itemUnit = wishlist.length > 1 ? "items" : "item";
 
     const renderItem = useCallback<ListRenderItem<Product>>(({ item }) => {
         return <WishlistCard item={item} />
     }, [])
+
+    if (isLoadingWishlist) {
+        return (
+            <WishlistSkeleton />
+        );
+    }
 
     return (
         <ProfileHeader
@@ -40,4 +47,4 @@ const wishlistScreen = () => {
     )
 }
 
-export default wishlistScreen
+export default React.memo(WishlistScreen);

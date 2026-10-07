@@ -1,14 +1,15 @@
-import { View, FlatList, ListRenderItem, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
-import ProfileHeader from '@/components/ProfileHeader';
-import useAddresses from '@/hooks/useAddresses';
-import { Address } from '@/types';
-import AdressCard from '@/components/AdressCard';
+import { View, FlatList, ListRenderItem, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import React, { useCallback, useState } from 'react'
+import ProfileHeader from '@/src/components/ProfileHeader';
+import useAddresses from '@/src/hooks/useAddresses';
+import { Address } from '@/src/types';
+import AdressCard from '@/src/components/AdressCard';
 import { Ionicons } from '@expo/vector-icons';
-import { Color } from '@/models/Color';
-import AppText from '@/components/AppText';
-import { Typography } from '@/models/Font';
-import AddressForm from '@/components/AddressForm';
+import { Color } from '@/src/models/Color';
+import AppText from '@/src/components/AppText';
+import { Typography } from '@/src/models/Font';
+import AddressForm from '@/src/components/AddressForm';
+import { AddressSkeleton } from '@/src/components/LoadingSkeletonView';
 
 const styles = StyleSheet.create({
     scrollView: {
@@ -66,8 +67,8 @@ const styles = StyleSheet.create({
     }
 })
 
-const addressesScreen = () => {
-    const { addresses, isLoading, addAddress, isAddingAddress, updateAddress, isUpdatingAddress, deleteAddress, isDeletingAddress } = useAddresses();
+const AddressesScreen = () => {
+    const { addresses, addAddress, isLoading: isLoadingAddress, isAddingAddress, updateAddress, isUpdatingAddress, deleteAddress, isDeletingAddress } = useAddresses();
     const [showAddressForm, setShowAddressForm] = useState(false);
     const [editingId, setEditingId] = useState("");
     const [addressForm, setAddressForm] = useState({
@@ -81,25 +82,52 @@ const addressesScreen = () => {
         isDefault: false,
     });
 
-    const renderItem = useCallback<ListRenderItem<Address>>(({ item }) => {
-        return <AdressCard
-            item={item}
-            handleEdit={handleEditAddress}
-            handleDelete={() => onDelete(item._id)}
-            isUpdatingAddress={isUpdatingAddress}
-            isDeletingAddress={isDeletingAddress} />
+    const onClose = useCallback(() => {
+        setEditingId("");
+        setAddressForm({
+            label: "",
+            fullName: "",
+            streetAddress: "",
+            city: "",
+            state: "",
+            zipCode: "",
+            phoneNumber: "",
+            isDefault: false,
+        });
+        setShowAddressForm(false);
     }, []);
 
-    const renderFooter = useCallback(() => {
-        return <TouchableOpacity style={styles.addBtnContainer} onPress={() => handleAddAddress()}>
-            <View style={styles.btnIcon}>
-                <Ionicons name="add" color={Color.Black} size={15} />
-            </View>
-            <AppText style={styles.addAddressBtnText} typography={Typography.textSmB}>{"   Add New Address"}</AppText>
-        </TouchableOpacity>
-    }, [])
+    const handleAddAddress = useCallback(() => {
+        setEditingId("");
+        setAddressForm({
+            label: "",
+            fullName: "",
+            streetAddress: "",
+            city: "",
+            state: "",
+            zipCode: "",
+            phoneNumber: "",
+            isDefault: false,
+        });
+        setShowAddressForm(true);
+    }, []);
 
-    const onDelete = (id: string) => {
+    const handleEditAddress = useCallback((address: Address) => {
+        setEditingId(address._id);
+        setAddressForm({
+            label: address.label,
+            fullName: address.fullName,
+            streetAddress: address.streetAddress,
+            city: address.city,
+            state: address.state,
+            zipCode: address.zipCode,
+            phoneNumber: address.phoneNumber,
+            isDefault: address.isDefault,
+        });
+        setShowAddressForm(true);
+    }, []);
+
+    const onDelete = useCallback((id: string) => {
         Alert.alert("Delete Address", "Are you sure to delete this address?", [
             { text: "Cancel", style: "cancel" },
             {
@@ -108,9 +136,9 @@ const addressesScreen = () => {
                 onPress: () => deleteAddress(id)
             }
         ])
-    }
+    }, [deleteAddress]);
 
-    const onSave = () => {
+    const onSave = useCallback(() => {
         if (editingId) {
             updateAddress({ addressId: editingId, addressData: addressForm }, {
                 onSuccess: () => {
@@ -142,53 +170,31 @@ const addressesScreen = () => {
                 }
             })
         }
-    }
+    }, [editingId, addressForm, updateAddress, addAddress, setShowAddressForm]);
 
+    const renderItem = useCallback<ListRenderItem<Address>>(({ item }) => {
+        return <AdressCard
+            item={item}
+            handleEdit={handleEditAddress}
+            handleDelete={() => onDelete(item._id)}
+            isUpdatingAddress={isUpdatingAddress}
+            isDeletingAddress={isDeletingAddress} />
+    }, [handleEditAddress, onDelete, isUpdatingAddress, isDeletingAddress]);
 
-    const onClose = () => {
-        setEditingId("");
-        setAddressForm({
-            label: "",
-            fullName: "",
-            streetAddress: "",
-            city: "",
-            state: "",
-            zipCode: "",
-            phoneNumber: "",
-            isDefault: false,
-        });
-        setShowAddressForm(false);
-    }
+    const renderFooter = useCallback(() => {
+        return <TouchableOpacity style={styles.addBtnContainer} onPress={() => handleAddAddress()}>
+            <View style={styles.btnIcon}>
+                <Ionicons name="add" color={Color.Black} size={15} />
+            </View>
+            <AppText style={styles.addAddressBtnText} typography={Typography.textSmB}>{"   Add New Address"}</AppText>
+        </TouchableOpacity>
+    }, [handleAddAddress])
 
-    const handleAddAddress = () => {
-        setEditingId("");
-        setAddressForm({
-            label: "",
-            fullName: "",
-            streetAddress: "",
-            city: "",
-            state: "",
-            zipCode: "",
-            phoneNumber: "",
-            isDefault: false,
-        });
-        setShowAddressForm(true);
-    }
-
-    const handleEditAddress = (address: Address) => {
-        setEditingId(address._id);
-        setAddressForm({
-            label: address.label,
-            fullName: address.fullName,
-            streetAddress: address.streetAddress,
-            city: address.city,
-            state: address.state,
-            zipCode: address.zipCode,
-            phoneNumber: address.phoneNumber,
-            isDefault: address.isDefault,
-        });
-        setShowAddressForm(true);
-    }
+    if (isLoadingAddress) {
+        return (
+            <AddressSkeleton />
+        );
+    };
 
     return (
         <ProfileHeader screenTitle={"My Addresses"}>
@@ -224,4 +230,4 @@ const addressesScreen = () => {
     )
 };
 
-export default addressesScreen;
+export default React.memo(AddressesScreen);
