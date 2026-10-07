@@ -1,5 +1,31 @@
 import { User } from "../models/user.model.js";
 
+// Add to your user.controller.js
+
+export async function getUserProfile(req, res) {
+    try {
+        // Fetch fresh user data and populate wishlist products
+        const user = await User.findById(req.user._id).populate("wishlist");
+
+        res.status(200).json({
+            _id: user._id,
+            email: user.email,
+            name: user.name,
+            imageUrl: user.imageUrl,
+            clerkId: user.clerkId,
+            stripeCustomerId: user.stripeCustomerId,
+            expoPushToken: user.expoPushToken,
+            addresses: user.addresses,
+            wishlist: user.wishlist,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        });
+    } catch (error) {
+        console.error("Error in getUserProfile controller:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
 export async function addAddress(req, res) {
     try {
         const { label, fullName, streetAddress, city, state, zipCode, phoneNumber, isDefault } = req.body;
@@ -85,12 +111,17 @@ export async function deleteAddress(req, res) {
         const user = req.user;
         const { addressId } = req.params;
 
-        if (!user.addresses.includes(addressId)) return res.status(404).json({ message: "Address not found" });
-        user.addresses.pull(addressId);
+        // Find the subdocument by ID
+        const address = user.addresses.id(addressId);
+        if (!address) {
+            return res.status(404).json({ message: "Address not found" });
+        }
 
+        // Pull the address subdocument
+        user.addresses.pull(addressId);
         await user.save();
 
-        res.status(200).json({ message: "Address deleted successfully", addresses: user.addresses })
+        res.status(200).json({ message: "Address deleted successfully", addresses: user.addresses });
     } catch (error) {
         console.error("Error in deleteAddress controller", error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -138,6 +169,25 @@ export async function removeFromWishlist(req, res) {
         res.status(200).json({ wishlist: user.wishlist });
     } catch (error) {
         console.error("Error in removeFromWishlist controller", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export async function updatePushToken(req, res) {
+    try {
+        const user = req.user;
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ message: "Token is required in request body" });
+        }
+
+        user.expoPushToken = token || "";
+        await user.save();
+
+        res.status(200).json({ message: "Push token updated successfully" });
+    } catch (error) {
+        console.error("Error in updatePushToken controller:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
