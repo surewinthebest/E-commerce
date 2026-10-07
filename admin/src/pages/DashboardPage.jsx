@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query"
-import { orderApi, statsApi } from "../lib/api"
+import { useQuery } from "@tanstack/react-query";
+import { orderApi, statsApi } from "../lib/api";
 import { DollarSignIcon, ShoppingBagIcon, UsersIcon, PackageIcon } from "lucide-react";
 import { getOrderStatusBadge, capitalizeText, formatDate } from "../lib/utils";
 
@@ -16,47 +16,49 @@ function DashboardPage() {
 
     const recentOrders = ordersData?.orders?.slice(0, 5) || [];
 
+    // Safely extract stats with fallback default values
+    const totalRevenue = statsData?.totalRevenue ?? 0;
+    const totalOrder = statsData?.totalOrder ?? statsData?.totalOrders ?? 0;
+    const totalCustomers = statsData?.totalCustomers ?? 0;
+    const totalProducts = statsData?.totalProducts ?? 0;
+
     const statsCards = [
         {
             name: "Total Revenue",
-            value: statsLoading ? "..." : `$${statsData?.totalRevenue?.toFixed(2)}`,
+            value: statsLoading ? "..." : `$${totalRevenue.toFixed(2)}`,
             icon: <DollarSignIcon className="w-8 h-8" />
         },
         {
             name: "Total Orders",
-            value: statsLoading ? "..." : `${statsData.totalOrder}`,
+            value: statsLoading ? "..." : `${totalOrder}`,
             icon: <ShoppingBagIcon className="w-8 h-8" />
         },
         {
             name: "Total Customer",
-            value: statsLoading ? "..." : `${statsData.totalCustomers}`,
+            value: statsLoading ? "..." : `${totalCustomers}`,
             icon: <UsersIcon className="w-8 h-8" />
         },
         {
             name: "Total Products",
-            value: statsLoading ? "..." : `${statsData.totalProducts}`,
+            value: statsLoading ? "..." : `${totalProducts}`,
             icon: <PackageIcon className="w-8 h-8" />
         },
-    ]
+    ];
 
     return (
         <div className="space-y-6">
-            {/* {STATS} */}
+            {/* STATS */}
             <div className="stats stats-vertical lg:stat-horizontal shadow w-full bg-base-100">
-                {
-                    statsCards.map((stat) => {
-                        return (
-                            <div key={stat.name} className="stat">
-                                <div className="stat-figure text-primary">{stat.icon}</div>
-                                <div className="stat-title">{stat.name}</div>
-                                <div className="stat-value">{stat.value}</div>
-                            </div>
-                        )
-                    })
-                }
+                {statsCards.map((stat) => (
+                    <div key={stat.name} className="stat">
+                        <div className="stat-figure text-primary">{stat.icon}</div>
+                        <div className="stat-title">{stat.name}</div>
+                        <div className="stat-value">{stat.value}</div>
+                    </div>
+                ))}
             </div>
 
-            {/* {RECENT ORDERS} */}
+            {/* RECENT ORDERS */}
             <div className="card bg-base-100 shadow-xl">
                 <div className="card-body">
                     <h2 className="card-title">Recent Orders</h2>
@@ -81,41 +83,47 @@ function DashboardPage() {
                                 </thead>
                                 <tbody>
                                     {recentOrders.map((order) => {
-                                        return (<tr key={order._id}>
-                                            <td>
-                                                <span className="font-medium">#{order._id.slice(-8).toUpperCase()}</span>
-                                            </td>
+                                        const customerName = order?.shippingAddress?.fullName || order?.shippingAddress?.fullname || "Customer";
+                                        const itemCount = order?.orderItems?.length || 0;
+                                        const totalPrice = order?.totalPrice ?? order?.totalPrices ?? 0;
 
-                                            <td>
-                                                <div>
-                                                    <div className="font-medium">{order.shippingAddress.fullname}</div>
-                                                    <div className="text-sm opacity-60">{order.orderItems.length} item(s)</div>
-                                                </div>
+                                        return (
+                                            <tr key={order._id}>
+                                                <td>
+                                                    <span className="font-medium">
+                                                        #{order._id?.slice(-8)?.toUpperCase()}
+                                                    </span>
+                                                </td>
 
-                                            </td>
+                                                <td>
+                                                    <div>
+                                                        <div className="font-medium">{customerName}</div>
+                                                        <div className="text-sm opacity-60">{itemCount} item(s)</div>
+                                                    </div>
+                                                </td>
 
-                                            <td>
-                                                <div className="text-sm">
-                                                    {order.orderItems[0]?.name}
-                                                    {order.orderItems.length > 1 && ` +${order.orderItems.length - 1} more`}
-                                                </div>
-                                            </td>
+                                                <td>
+                                                    <div className="text-sm">
+                                                        {order.orderItems?.[0]?.name || "Product"}
+                                                        {itemCount > 1 && ` +${itemCount - 1} more`}
+                                                    </div>
+                                                </td>
 
-                                            <td>
-                                                <span className="font-semibold">{order.totalPrices.toFixed(2)}</span>
-                                            </td>
+                                                <td>
+                                                    <span className="font-semibold">${Number(totalPrice).toFixed(2)}</span>
+                                                </td>
 
-                                            <td>
-                                                <div className={`badge ${getOrderStatusBadge(order.status)}`}>
-                                                    {capitalizeText(order.status)}
-                                                </div>
-                                            </td>
+                                                <td>
+                                                    <div className={`badge ${getOrderStatusBadge(order.status)}`}>
+                                                        {capitalizeText(order.status || "pending")}
+                                                    </div>
+                                                </td>
 
-                                            <td>
-                                                <span className="text-sm opacity-60">{formatDate(order.createdAt)}</span>
-                                            </td>
-                                        </tr>
-                                        )
+                                                <td>
+                                                    <span className="text-sm opacity-60">{formatDate(order.createdAt)}</span>
+                                                </td>
+                                            </tr>
+                                        );
                                     })}
                                 </tbody>
                             </table>
@@ -124,7 +132,7 @@ function DashboardPage() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default DashboardPage;
