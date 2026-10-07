@@ -1,0 +1,27 @@
+diff --git a/node_modules/react-native/scripts/cocoapods/spm.rb b/node_modules/react-native/scripts/cocoapods/spm.rb
+index 0b13207..0aa3ff7 100644
+--- a/node_modules/react-native/scripts/cocoapods/spm.rb
++++ b/node_modules/react-native/scripts/cocoapods/spm.rb
+@@ -21,6 +21,14 @@ class SPMManager
+     log 'Adding SPM dependencies to Pods project'
+     @dependencies_by_pod.each do |pod_name, dependencies|
+       dependencies.each do |spm_spec|
++
++# 1. Find target or fallback to case/dash match
++target = project.targets.find { |t| t.name == pod_name } || 
++project.targets.find { |t| t.name.downcase == pod_name.downcase.gsub('/', '-') }
++
++# Guard against nil target
++next unless target
++
+         log "Adding SPM dependency on product #{spm_spec[:products]}"
+         add_spm_to_target(
+           project,
+@@ -66,6 +74,7 @@ class SPMManager
+   end
+ 
+   def add_spm_to_target(project, target, url, requirement, products)
++    return unless target # Guard against nil target
+     pkg_class = Xcodeproj::Project::Object::XCRemoteSwiftPackageReference
+     ref_class = Xcodeproj::Project::Object::XCSwiftPackageProductDependency
+     pkg = project.root_object.package_references.find { |p| p.class == pkg_class && p.repositoryURL == url }
