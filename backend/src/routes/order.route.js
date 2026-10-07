@@ -6,7 +6,7 @@ const router = Router();
 
 router.use(protectRoute);
 
-router.post("/orders", createOrder);
-router.get("/orders", getUserOrders);
+router.post("/", createOrder);
+router.get("/", getUserOrders);
 
 export default router;
