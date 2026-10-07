@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { Asset } from "expo-asset";
 import LottieView from "lottie-react-native";
-import { Color } from "@/models/Color";
+import { Color } from "@/src/models/Color";
 
 // Keep static splash screen visible until Lottie starts
 SplashScreen.preventAutoHideAsync().catch(() => {});
