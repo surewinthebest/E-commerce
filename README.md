@@ -76,11 +76,11 @@ Automated build, test, and deployment workflows are managed via **GitHub Actions
 
 ### Pipeline Overview
 
-| Workflow                        | Triggers                                   | Target / Action                  | Key Steps                                      |
-| ------------------------------- | ------------------------------------------ | -------------------------------- | ---------------------------------------------- |
-| **Continuous Integration (CI)** | `push` or `pull_request` to `main`         | Quality & Test Checks            | `make setup` → `make ci`                       |
-| **Staging Deployment (CD)**     | Tag `staging-v*` or `workflow_dispatch`    | EAS Staging Build                | `eas build --profile staging --auto-submit`    |
-| **Production Deployment (CD)**  | `push` to `release` or `workflow_dispatch` | Store Submission (iOS / Android) | `eas build --profile production --auto-submit` |
+| Workflow | Triggers | Target / Action | Key Steps |
+| :--- | :--- | :--- | :--- |
+| **Continuous Integration (CI)** | `push` or `pull_request` to `main` | Quality & Test Checks | `make setup` → `make ci` |
+| **Staging Deployment (CD)** | Tag `staging-v*` or `workflow_dispatch` | EAS Staging Build | `eas build --profile staging --auto-submit` |
+| **Production Deployment (CD)** | `push` to `release` or `workflow_dispatch` | Store Submission (iOS / Android) | `eas build --profile production --auto-submit` |
 
 ---
 
