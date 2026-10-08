@@ -36,7 +36,6 @@ $ npx expo run:android
 $ make ci
 ```
 
-
 ## ✨ Features
 
 - **📂 Product Discovery:** Categorized listings, search filtering, and high-resolution image galleries.
@@ -70,10 +69,21 @@ $ make ci
 | staging    | http://localhost:3000/api                      |
 | production | https://expo-e-commerce-1tspv.sevalla.app/api  |
 
+---
 
 ## 🚀 CI/CD 4 BUILD PIPELINE
+Automated build, test, and deployment workflows are managed via **GitHub Actions** and **Expo Application Services (EAS)**.
 
-   Bash
+### Pipeline Overview
+
+| Workflow | Triggers | Target / Action | Key Steps |
+| :--- | :--- | :--- | :--- |
+| **Continuous Integration (CI)** | `push` or `pull_request` to `main` | Quality & Test Checks | `make setup` → `make ci` |
+| **Staging Deployment (CD)** | Tag `staging-v*` or `workflow_dispatch` | EAS Staging Build | `eas build --profile staging --auto-submit` |
+| **Production Deployment (CD)** | `push` to `release` or `workflow_dispatch` | Store Submission (iOS / Android) | `eas build --profile production --auto-submit` |
+
+---
+
 # Staging Build
 npx eas build --platform all --profile staging
 
