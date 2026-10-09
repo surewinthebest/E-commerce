@@ -55,12 +55,7 @@ const NotificationScreen = () => {
         </AppText>
       }
     >
-      {isLoadingNoti ? (
-        // <View style={styles.centerContainer}>
-        //   <ActivityIndicator size="large" color={Color.Green} />
-        // </View>
-        <NotificationSkeleton />
-      ) : isErrorNoti ? (
+      {isErrorNoti ? (
         <View style={styles.centerContainer}>
           <AppText style={styles.errorText} typography={Typography.textSm}>
             Failed to load notifications
@@ -74,7 +69,7 @@ const NotificationScreen = () => {
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <View style={styles.centerContainer}>
+            isLoadingNoti ? <NotificationSkeleton /> : <View style={styles.centerContainer}>
               <AppText style={styles.emptyText} typography={Typography.textSm}>
                 No notifications yet
               </AppText>

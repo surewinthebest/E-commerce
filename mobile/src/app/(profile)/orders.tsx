@@ -41,11 +41,6 @@ const OrdersScreen = () => {
         />
     };
 
-    if(isLoadingOrders){
-        return (
-            <OrdersSkeleton/>
-        );
-    };
 
     return (
         <ProfileHeader screenTitle={"My Orders"}>
@@ -62,6 +57,7 @@ const OrdersScreen = () => {
                         setReviewInfo={(orderId: string, orderItems: OrderItem[] | null) => onPressReviewModal(orderId, orderItems)}
                     /></React.Fragment>
                 })}
+                {isLoadingOrders && <OrdersSkeleton />}
             </ScrollView>
 
             <ReviewModal

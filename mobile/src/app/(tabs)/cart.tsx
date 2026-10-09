@@ -208,10 +208,6 @@ const CartScreen = () => {
 
   const itemCountUnit = cartItemCount > 1 ? "items" : "item";
 
-  if(isLoadingCart){
-    return(<CartSkeleton/>);
-  };
-
   if (!cart) return;
   return (
     <View style={styles.screen}>
@@ -228,7 +224,7 @@ const CartScreen = () => {
         >
           {cartItems.length > 0 ? cartItems.map((item) => {
             return <Fragment key={item._id}><CartItemCard item={item} /></Fragment>
-          }) : null}
+          }) : isLoadingCart ?<CartSkeleton/> : null}
         </ScrollView>
         <View style={styles.cartSummaryContainer}>
           <CartSummaryCard />

@@ -28,12 +28,6 @@ const WishlistScreen = () => {
         return <WishlistCard item={item} />
     }, [])
 
-    if (isLoadingWishlist) {
-        return (
-            <WishlistSkeleton />
-        );
-    }
-
     return (
         <ProfileHeader
             screenTitle={"Wishlist"}
@@ -42,6 +36,7 @@ const WishlistScreen = () => {
                 keyExtractor={(item) => item._id}
                 data={wishlist}
                 renderItem={renderItem}
+                ListEmptyComponent={isLoadingWishlist ? <WishlistSkeleton /> : null}
             />
         </ProfileHeader>
     )
