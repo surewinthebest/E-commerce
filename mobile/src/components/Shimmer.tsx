@@ -30,7 +30,7 @@ const Shimmer: React.FC<ShimmerProps> = ({
 
 const styles = StyleSheet.create({
   shimmer: {
-    backgroundColor: Color.DarkGray,
+    backgroundColor: Color.ProfileGray,
     overflow: 'hidden',
   },
 });
