@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { Asset } from "expo-asset";
+import * as Font from "expo-font";
+import Ionicons from "@expo/vector-icons/Ionicons"; 
 import LottieView from "lottie-react-native";
 import { Color } from "@/src/models/Color";
 
-// Keep static splash screen visible until Lottie starts
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 interface SplashScreenWrapperProps {
@@ -19,7 +20,6 @@ export default function SplashScreenWrapper({ children }: SplashScreenWrapperPro
   useEffect(() => {
     async function prepare() {
       try {
-        // Pre-cache essential static images into memory
         const imageAssets = [
           require("@/src/assets/images/icon.png"),
           require("@/src/assets/images/auth-image.png"),
@@ -31,12 +31,13 @@ export default function SplashScreenWrapper({ children }: SplashScreenWrapperPro
           Asset.fromModule(image).downloadAsync()
         );
 
-        await Promise.all([...cacheImages]);
+        const cacheFonts = Font.loadAsync(Ionicons.font);
+
+        await Promise.all([...cacheImages, cacheFonts]);
 
       } catch (e) {
         console.warn("Error loading startup assets:", e);
       } finally {
-        // Mark app as ready once all async tasks complete
         setAppReady(true);
       }
     }
@@ -55,7 +56,6 @@ export default function SplashScreenWrapper({ children }: SplashScreenWrapperPro
     return null;
   }
 
-  // Render Lottie animation until it finishes playing
   if (!animationFinished) {
     return (
       <View style={styles.container} onLayout={onLayoutRootView}>
@@ -71,7 +71,6 @@ export default function SplashScreenWrapper({ children }: SplashScreenWrapperPro
     );
   }
 
-  // Once animation completes, render the rest of the application
   return <>{children}</>;
 }
 
