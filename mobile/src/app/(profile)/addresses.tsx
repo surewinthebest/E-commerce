@@ -190,12 +190,6 @@ const AddressesScreen = () => {
         </TouchableOpacity>
     }, [handleAddAddress])
 
-    if (isLoadingAddress) {
-        return (
-            <AddressSkeleton />
-        );
-    };
-
     return (
         <ProfileHeader screenTitle={"My Addresses"}>
             <FlatList
@@ -204,7 +198,7 @@ const AddressesScreen = () => {
                 data={addresses}
                 renderItem={renderItem}
                 ListEmptyComponent={
-                    <View style={styles.emptyView}>
+                    isLoadingAddress ? <AddressSkeleton /> : <View style={styles.emptyView}>
                         <Ionicons name="location-outline" color={Color.Grey + "80"} size={77} />
                         <AppText style={styles.noAddressTitle} typography={Typography.textBaseB}>{"No address yet"}</AppText>
                         <AppText style={styles.noAddressContent} typography={Typography.textSm}>{"Add your first delivery address"}</AppText>

@@ -9,7 +9,7 @@ export const ShopSkeleton = () => (
         <View style={skeletonStyles.row}>
             {[1, 2].map((key) => (
                 <View key={key} style={skeletonStyles.productCard}>
-                    <Shimmer height={120} borderRadius={10} />
+                    <Shimmer height={180} borderRadius={10} />
                     <Shimmer width="80%" height={16} style={{ marginTop: 10 }} />
                     <Shimmer width="40%" height={14} style={{ marginTop: 6 }} />
                 </View>
@@ -33,7 +33,7 @@ export const CartSkeleton = () => (
         {[1, 2, 3].map((key) => (
             <View key={key} style={skeletonStyles.cartCard}>
                 <Shimmer width={70} height={70} borderRadius={10} />
-                <View style={{ flex: 1, marginLeft: 12 }}>
+                <View style={{ flex: 1, marginLeft: 12, marginTop: 5 }}>
                     <Shimmer width="70%" height={16} />
                     <Shimmer width="40%" height={14} style={{ marginTop: 8 }} />
                     <Shimmer width="30%" height={16} style={{ marginTop: 8 }} />
@@ -45,15 +45,23 @@ export const CartSkeleton = () => (
 
 // ------------------- Orders Skeleton -------------------
 export const OrdersSkeleton = () => (
-    <ScrollView showsVerticalScrollIndicator={false} style={{ marginTop: 10 }}>
+    <ScrollView showsVerticalScrollIndicator={false} style={{ marginTop: 20 }}>
         {[1, 2, 3].map((key) => (
             <View key={key} style={skeletonStyles.orderCard}>
-                <View style={skeletonStyles.spaceBetween}>
-                    <Shimmer width="40%" height={16} />
-                    <Shimmer width="25%" height={20} borderRadius={12} />
+                <View style={skeletonStyles.imageContainer}>
+                    <Shimmer width="45%" height={80} borderRadius={12} />
+                    <View style={{flexDirection: "column", right: 95, flex: 1}}>
+                    <Shimmer width="60%" height={14} style={{ marginTop: 12 }} />
+                    <Shimmer width="45%" height={10} style={{ marginTop: 12 }} />
+                    <Shimmer width="40%" height={14} style={{ marginTop: 12 }} />
+                    </View>
                 </View>
-                <Shimmer width="60%" height={14} style={{ marginTop: 12 }} />
+                <Shimmer width="70%" height={14} style={{ marginTop: 15 }} />
                 <Shimmer width="30%" height={16} style={{ marginTop: 12 }} />
+                <View style={skeletonStyles.spaceBetween}>
+                    <Shimmer width="40%" height={20} borderRadius={12} />
+                    <Shimmer width="50%" height={20} borderRadius={12} style={{ left: 100 }} />
+                </View>
             </View>
         ))}
     </ScrollView>
@@ -61,12 +69,14 @@ export const OrdersSkeleton = () => (
 
 // ------------------- Addresses Skeleton -------------------
 export const AddressSkeleton = () => (
-    <View style={{ marginTop: 10 }}>
+    <View style={{ marginTop: 20 }}>
         {[1, 2].map((key) => (
             <View key={key} style={skeletonStyles.addressCard}>
                 <Shimmer width="30%" height={18} />
                 <Shimmer width="80%" height={14} style={{ marginTop: 10 }} />
-                <Shimmer width="60%" height={14} style={{ marginTop: 6 }} />
+                <Shimmer width="80%" height={14} style={{ marginTop: 10 }} />
+                <Shimmer width="80%" height={14} style={{ marginTop: 10 }} />
+                <Shimmer width="60%" height={14} style={{ marginTop: 10 }} />
             </View>
         ))}
     </View>
@@ -89,7 +99,7 @@ export const NotificationSkeleton = () => (
 
 // ------------------- Wishlist Skeleton -------------------
 export const WishlistSkeleton = () => (
-    <View style={{ marginTop: 10 }}>
+    <View style={{ marginTop: 15 }}>
         {[1, 2, 3, 4].map((key) => (
             <View key={key} style={skeletonStyles.wishlistCard}>
                 <Shimmer width={65} height={65} borderRadius={10} />
@@ -109,44 +119,53 @@ const skeletonStyles = StyleSheet.create({
     row: { flexDirection: 'row', justifyContent: 'space-between' },
     productCard: {
         width: '48%',
-        backgroundColor: Color.DarkGray,
-        padding: 10,
-        borderRadius: 12,
+        backgroundColor: Color.ProfileGray,
+        padding: 15,
+        borderRadius: 20,
     },
     cartCard: {
         flexDirection: 'row',
-        backgroundColor: Color.DarkGray,
+        backgroundColor: Color.ProfileGray,
         padding: 12,
         borderRadius: 12,
-        marginBottom: 12,
+        marginBottom: 20,
     },
     orderCard: {
-        backgroundColor: Color.DarkGray,
+        backgroundColor: Color.ProfileGray,
         padding: 16,
         borderRadius: 12,
-        marginBottom: 12,
+        marginBottom: 20,
     },
     addressCard: {
-        backgroundColor: Color.DarkGray,
+        backgroundColor: Color.ProfileGray,
         padding: 16,
         borderRadius: 12,
-        marginBottom: 12,
+        marginBottom: 20,
     },
     NotificationCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Color.DarkGray,
+        backgroundColor: Color.ProfileGray,
         padding: 12,
         borderRadius: 12,
-        marginBottom: 10,
+        marginBottom: 20,
+        height: 80
     },
     wishlistCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Color.DarkGray,
+        backgroundColor: Color.ProfileGray,
         padding: 12,
         borderRadius: 12,
-        marginBottom: 12,
+        marginBottom: 20,
     },
-    spaceBetween: { flexDirection: 'row', justifyContent: 'space-between' },
+    spaceBetween: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 12
+    },
+    imageContainer: {
+        flexDirection: 'row',
+        marginTop: 12
+    },
 });
