@@ -46,3 +46,12 @@ app-example
 
 # Unit test
 coverage
+
+#env
+.env
+.env.dev
+.env.production
+.env.staging
+
+#android
+google-services.json
