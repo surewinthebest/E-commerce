@@ -69,24 +69,37 @@ const AIAssistantModal = ({
   const queryClient = useQueryClient();
 
   // Load initial 10 messages when modal opens
-  const fetchInitialHistory = async () => {
+  const fetchInitialHistory = useCallback(async () => {
     try {
       setFetchingHistory(true);
       const response = await api.get("/ai/history?limit=10");
-      setMessages(response.data.messages);
+      const fetched = response.data.messages || [];
+      setMessages(fetched);
       setHasMore(response.data.hasMore);
-    } catch (err) {
-      console.error("Error loading chat history:", err);
+    } catch (err: any) {
+      if (err.response?.status !== 401) {
+        console.error("Error loading chat history:", err);
+      }
     } finally {
       setFetchingHistory(false);
     }
-  };
+  }, [api]);
 
   useEffect(() => {
     if (visible) {
       fetchInitialHistory();
     }
   }, [visible, fetchInitialHistory]);
+
+  // Helper function to deduplicate array by ID
+  const deduplicateMessages = (msgArray: Message[]) => {
+    const seen = new Set<string>();
+    return msgArray.filter((item) => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+  };
 
   // Load next 10 older messages on scroll top (onEndReached for inverted list)
   const handleLoadMore = useCallback(async () => {
@@ -101,7 +114,7 @@ const AIAssistantModal = ({
         `/ai/history?limit=10&before=${encodeURIComponent(oldestMessage.createdAt)}`
       );
 
-      setMessages((prev) => [...prev, ...response.data.messages]);
+      setMessages((prev) => deduplicateMessages([...response.data.messages, ...prev,]));
       setHasMore(response.data.hasMore);
     } catch (err) {
       console.error("Error loading more history:", err);
@@ -119,7 +132,7 @@ const AIAssistantModal = ({
       content: input,
     };
 
-    setMessages((prev) => [userMessage, ...prev]);
+    setMessages((prev) => deduplicateMessages([userMessage, ...prev]));
     setInput("");
     setLoading(true);
 
@@ -132,7 +145,7 @@ const AIAssistantModal = ({
         role: "assistant",
         content: response.data.reply,
       };
-      setMessages((prev) => [assistantMessage, ...prev]);
+      setMessages((prev) => deduplicateMessages([assistantMessage, ...prev]));
       // Trigger TanStack Query refresh if cart was modified by agent
       if (response.data.cartUpdated) {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
@@ -158,14 +171,13 @@ const AIAssistantModal = ({
       }
 
       // 3. Append the error message from the assistant
-      setMessages((prev) => [
+      setMessages((prev) => deduplicateMessages([
         {
           id: (Date.now() + 1).toString(),
           role: "assistant",
           content: errorMessage,
-        },
-        ...prev,
-      ]);
+        }, ...prev
+      ]));
     } finally {
       setLoading(false);
     }

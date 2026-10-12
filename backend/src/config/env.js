@@ -21,4 +21,6 @@ export const ENV = {
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     DASHSCOPE_API_KEY: process.env.DASHSCOPE_API_KEY,
     DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
+    LOCAL_AI_MODEL: process.env.LOCAL_AI_MODEL,
+    OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL,
 }
