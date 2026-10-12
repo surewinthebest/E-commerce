@@ -41,15 +41,15 @@ export const semanticProductSearchTool = tool(
         const filter = categoryFilter ? { preFilter: { category: { $eq: categoryFilter } } } : {};
         const results = await vectorStore.similaritySearchWithScore(query, limit, filter);
 
-        const formatted = results.map(([doc, score]) => ({
-            id: doc.metadata._id,
+        const formatted = results.map(([doc]) => ({
+            productId: doc.metadata._id.toString(), // Used by agent for manage_cart
             name: doc.metadata.name,
             description: doc.pageContent,
             price: doc.metadata.price,
             category: doc.metadata.category,
             stock: doc.metadata.stock,
             averageRating: doc.metadata.averageRating,
-            similarityScore: score.toFixed(4), // Cosine proximity score
+            // similarityScore: score.toFixed(4), // Cosine proximity score
         }));
 
         return JSON.stringify(formatted);
@@ -172,9 +172,9 @@ export const manageCartTool = tool(
     },
     {
         name: "manage_cart",
-        description: "Add, set quantity, remove items, or clear the user's shopping cart.",
+        description: "Add, update, or remove items in the user's shopping cart using a product ID.",
         schema: z.object({
-            action: z.enum(["ADD", "UPDATE", "REMOVE", "CLEAR"]).describe("The cart action to perform"),
+            action: z.enum(["ADD", "UPDATE", "REMOVE", "CLEAR"]).describe("The action: 'ADD' to add item, 'UPDATE' to change quantity, 'REMOVE' to delete item, 'CLEAR' to empty cart."),
             productId: z.string().optional().describe("The MongoDB _id of the product"),
             quantity: z.number().optional().default(1).describe("Quantity to set or add (minimum 1)"),
         }),
